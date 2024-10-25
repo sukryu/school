@@ -37,10 +37,8 @@ void Display::update(const Resource& resource, const Map& map, const Cursor& cur
         std::fill(backbuf[i].begin(), backbuf[i].end(), ' ');
     }
 
-    // 리소스 정보 표시 (0번 줄)
+    // 리소스 정보, 맵과 상태창 테두리 그리기
     display_resource(resource);
-
-    // 맵과 상태창 테두리 그리기 (1번 줄부터)
     draw_border(RESOURCE_HEIGHT, 0, map_width, map_height);
     draw_border(RESOURCE_HEIGHT, map_width, status_width, map_height);
 
@@ -79,17 +77,17 @@ void Display::display_resource(const Resource& resource) {
 }
 
 void Display::display_map(const Map& map) {
+    // 맵 내용 표시 (백버퍼에 기록)
     for (int i = 0; i < map_height; i++) {
         for (int j = 0; j < map_width; j++) {
             char tile = ' ';
             int color = COLOR_DEFAULT;
 
-            // 1. 테두리 확인
+            // 테두리 확인
             auto border_tile = map.get_tile(0, { i, j });
             if (border_tile && *border_tile == '#') {
                 tile = '#';
             }
-            // 2. 테두리가 아닌 경우 내부 처리
             else {
                 // 실제 맵 좌표로 변환
                 Position map_pos = { i - 1, j - 1 };
@@ -116,9 +114,10 @@ void Display::display_map(const Map& map) {
                 }
             }
 
-            // 리소스 표시줄 고려
+            // 백버퍼에 저장
             backbuf[i + 1][j] = tile;
             colorbuf[i + 1][j] = color;
+            frontbuf[i + 1][j] = ' ';  // 강제 업데이트를 위해 초기화
         }
     }
 }
@@ -127,32 +126,56 @@ void Display::display_cursor(const Cursor& cursor) {
     Position prev = cursor.get_previous_position();
     Position curr = cursor.get_current_position();
 
-    // 이전 커서 위치의 원래 내용 복원
+    // 좌표 변환 (리소스 표시줄과 테두리 고려)
+    int display_y_offset = 2;  // 리소스 표시줄(1) + 테두리(1)
+    int display_x_offset = 1;  // 테두리(1)
+
+    // 이전 커서 위치 복원
+    int prev_display_y = prev.row + display_y_offset;
+    int prev_display_x = prev.column + display_x_offset;
+
+    // 프론트버퍼에서 이전 커서 위치를 복원하고 초기화
     if (prev.row >= 0 && prev.row < map_height - 2 &&
         prev.column >= 0 && prev.column < map_width - 2) {
-        char prev_ch = backbuf[prev.row + 2][prev.column + 1];
-        int prev_color = colorbuf[prev.row + 2][prev.column + 1];
-        frontbuf[prev.row + 2][prev.column + 1] = ' ';  // 강제로 업데이트하기 위해
-        IO::printc({ prev.row + 2, prev.column + 1 }, prev_ch, prev_color);
+        char ch = backbuf[prev_display_y][prev_display_x];
+        int col = colorbuf[prev_display_y][prev_display_x];
+        IO::printc({ prev_display_y, prev_display_x }, ch, col);
+
+        // 프론트버퍼도 초기화하여 잔상 문제 해결 시도
+        frontbuf[prev_display_y][prev_display_x] = ch;
     }
 
-    // 현재 커서 위치의 내용 저장 및 커서 표시
+    // 현재 커서 위치 표시
+    int curr_display_y = curr.row + display_y_offset;
+    int curr_display_x = curr.column + display_x_offset;
+
     if (curr.row >= 0 && curr.row < map_height - 2 &&
         curr.column >= 0 && curr.column < map_width - 2) {
-        char curr_ch = backbuf[curr.row + 2][curr.column + 1];
-        frontbuf[curr.row + 2][curr.column + 1] = ' ';  // 강제로 업데이트하기 위해
-        IO::printc({ curr.row + 2, curr.column + 1 }, curr_ch, COLOR_CURSOR);
+        // 커서 색상으로 현재 위치에 표시
+        IO::printc({ curr_display_y, curr_display_x }, backbuf[curr_display_y][curr_display_x], COLOR_CURSOR);
+
+        // 프론트버퍼도 현재 커서 위치로 갱신
+        frontbuf[curr_display_y][curr_display_x] = backbuf[curr_display_y][curr_display_x];
     }
 }
 
 void Display::display_status_window() {
     const int start_x = map_width + 1;
-    const std::string title = "Selected: None";
+    const int start_y = RESOURCE_HEIGHT + 1;  // 리소스 표시줄 아래부터 시작
 
-    for (size_t i = 0; i < title.length(); i++) {
-        backbuf[2][start_x + 2 + i] = title[i];
-        colorbuf[2][start_x + 2 + i] = COLOR_DEFAULT;
+    // 만약 current_status가 비어있다면 기본 메시지 사용
+    std::string status_text = current_status.empty() ? "Selected: None" : current_status;
+
+    // 상태 텍스트 표시
+    for (size_t i = 0; i < status_text.length(); i++) {
+        if (start_x + 2 + i < total_width) {  // 경계 검사
+            backbuf[start_y + 1][start_x + 2 + i] = status_text[i];
+            colorbuf[start_y + 1][start_x + 2 + i] = COLOR_DEFAULT;
+        }
     }
+
+    // 선택된 오브젝트의 추가 정보 표시 (아래쪽 여러 줄에 표시 가능)
+    // 여기에 필요한 경우 추가 정보를 표시할 수 있음
 }
 
 void Display::display_system_messages() {
@@ -172,25 +195,30 @@ void Display::display_system_messages() {
 
 void Display::display_command_window() {
     const int start_x = map_width + 1;
-    const int start_y = map_height + 1;
-    const std::vector<std::string> commands = {
-        "Commands:",
-        "B: Build",
-        "T: Train",
-        "Q: Quit"
-    };
+    const int start_y = RESOURCE_HEIGHT + map_height;  // 맵 아래 시작
 
+    // 명령어 목록이 비어있으면 기본 명령어 사용
+    std::vector<std::string> commands = current_commands.empty() ?
+        std::vector<std::string>{
+        "Commands:",
+            "B: Build",
+            "T: Train",
+            "Q: Quit"
+    } : current_commands;
+
+    // 명령어 목록 표시
     for (size_t i = 0; i < commands.size(); i++) {
         const std::string& cmd = commands[i];
         for (size_t j = 0; j < cmd.length(); j++) {
-            backbuf[start_y + 1 + i][start_x + 2 + j] = cmd[j];
-            colorbuf[start_y + 1 + i][start_x + 2 + j] = COLOR_DEFAULT;
+            if (start_x + 2 + j < total_width && start_y + 1 + i < total_height) {  // 경계 검사
+                backbuf[start_y + 1 + i][start_x + 2 + j] = cmd[j];
+                colorbuf[start_y + 1 + i][start_x + 2 + j] = COLOR_DEFAULT;
+            }
         }
     }
 }
 
 void Display::update_screen() {
-    // 경계 검사를 포함한 화면 갱신
     for (int i = 0; i < total_height; i++) {
         for (int j = 0; j < total_width; j++) {
             if (backbuf[i][j] != frontbuf[i][j]) {
@@ -213,4 +241,12 @@ void Display::add_command_message(const std::string& message) {
     if (command_messages.size() > 5) {  // 최대 5개 메시지 유지
         command_messages.erase(command_messages.begin());
     }
+}
+
+void Display::update_status(const std::string& status) {
+    current_status = status;
+}
+
+void Display::update_commands(const std::vector<std::string>& commands) {
+    current_commands = commands;
 }

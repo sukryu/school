@@ -26,6 +26,12 @@ private:
     void intro();
     void outro();
 
+    Selection current_selection;
+    void handle_movement(Key key);
+    void handle_selection();
+    void handle_escape();
+    void update_selection_display();
+
     std::chrono::milliseconds sys_clock;
     Map map;
     Resource resource;

@@ -11,6 +11,8 @@ public:
     void update(const Resource& resource, const Map& map, const Cursor& cursor);
     void add_system_message(const std::string& message);
     void add_command_message(const std::string& message);
+    void update_status(const std::string& status);
+    void update_commands(const std::vector<std::string>& commands);
 
 private:
     static constexpr int RESOURCE_HEIGHT = 1;
@@ -36,4 +38,6 @@ private:
     std::vector<std::vector<int>> colorbuf;  // 색상 버퍼 추가
     std::vector<std::string> system_messages;
     std::vector<std::string> command_messages;
+    std::string current_status;
+    std::vector<std::string> current_commands;
 };

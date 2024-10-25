@@ -55,7 +55,26 @@ enum class Direction {
 };
 
 enum class Key {
-    None = 0, Up, Right, Left, Down, Quit, Undefined
+    None = 0, Up, Right, Left, Down, Space, Esc, Quit, Undefined
+};
+
+enum class SelectionType {
+    None,
+    Terrain,
+    Building,
+    Unit
+};
+
+struct Selection {
+    SelectionType type = SelectionType::None;
+    Position position = { 0, 0 };
+    const void* selected_ptr = nullptr;
+
+    void clear() {
+        type = SelectionType::None;
+        position = { 0, 0 };
+        selected_ptr = nullptr;
+    }
 };
 
 constexpr bool is_arrow_key(Key k) {

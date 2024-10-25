@@ -182,25 +182,109 @@ void Game::run() {
     while (true) {
         Key key = IO::get_key();
 
-        if (is_arrow_key(key)) {
-            cursor.move(key_to_direction(key));
+        if (key == Key::Quit) {
+            outro();
         }
-        else {
-            switch (key) {
-            case Key::Quit:
-                outro();
-                break;
-            case Key::None:
-            case Key::Undefined:
-            default:
-                break;
-            }
+        else if (key == Key::Space) {
+            handle_selection();
+        }
+        else if (key == Key::Esc) {
+            handle_escape();
+        }
+        else if (key == Key::Up || key == Key::Down ||
+            key == Key::Left || key == Key::Right) {
+            handle_movement(key);
         }
 
         map.update(sys_clock);
+        update_selection_display();
         display.update(resource, map, cursor);
 
         std::this_thread::sleep_for(std::chrono::milliseconds(TICK));
         sys_clock += std::chrono::milliseconds(TICK);
     }
+}
+
+void Game::handle_movement(Key key) {
+    Direction dir;
+    switch (key) {
+    case Key::Up:    dir = Direction::Up;    break;
+    case Key::Down:  dir = Direction::Down;  break;
+    case Key::Left:  dir = Direction::Left;  break;
+    case Key::Right: dir = Direction::Right; break;
+    default: return;
+    }
+
+    int move_amount = IO::is_double_click() ? 10 : 1;
+
+    for (int i = 0; i < move_amount; i++) {
+        Position new_pos = ::move(cursor.get_current_position(), dir);
+        if (new_pos.row >= 0 && new_pos.row < MAP_HEIGHT - 2 &&
+            new_pos.column >= 0 && new_pos.column < MAP_WIDTH - 2) {
+            cursor.move(dir);
+        }
+        else {
+            break;
+        }
+    }
+}
+
+void Game::handle_selection() {
+    Position pos = cursor.get_current_position();
+    current_selection.position = pos;
+
+    if (auto unit = map.get_unit_at(pos)) {
+        current_selection.type = SelectionType::Unit;
+        current_selection.selected_ptr = unit;
+    }
+    else if (auto building = map.get_building_at(pos)) {
+        current_selection.type = SelectionType::Building;
+        current_selection.selected_ptr = building;
+    }
+    else {
+        current_selection.type = SelectionType::Terrain;
+        current_selection.selected_ptr = &map.get_terrain(pos);
+    }
+}
+
+void Game::handle_escape() {
+    current_selection.clear();
+}
+
+void Game::update_selection_display() {
+    std::string status_text;
+    std::vector<std::string> command_text;
+
+    switch (current_selection.type) {
+    case SelectionType::Unit:
+    {
+        auto unit = static_cast<const Unit*>(current_selection.selected_ptr);
+        status_text = "Selected Unit: " + std::string(1, unit->get_representation());
+        command_text = { "M: Move", "A: Attack", "S: Stop" };
+    }
+    break;
+    case SelectionType::Building:
+    {
+        auto building = static_cast<const Building*>(current_selection.selected_ptr);
+        status_text = "Selected Building: " + std::string(1, building->get_representation());
+        command_text = { "B: Build", "T: Train", "C: Cancel" };
+    }
+    break;
+    case SelectionType::Terrain:
+    {
+        auto terrain = static_cast<const Terrain*>(current_selection.selected_ptr);
+        status_text = "Desert Terrain";
+        if (terrain->can_harvest_spice()) {
+            command_text = { "H: Harvest Spice" };
+        }
+    }
+    break;
+    default:
+        status_text = "No Selection";
+        command_text = { "B: Build", "T: Train", "Q: Quit" };
+        break;
+    }
+
+    display.update_status(status_text);
+    display.update_commands(command_text);
 }
