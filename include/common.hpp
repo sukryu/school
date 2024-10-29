@@ -1,5 +1,6 @@
 #pragma once
 
+#include <Windows.h>
 #include <cstdint>
 #include <array>
 #include <chrono>
@@ -11,6 +12,8 @@ constexpr int TICK = 10; // time unit(ms)
 constexpr int N_LAYER = 2;
 constexpr int MAP_WIDTH = 60;
 constexpr int MAP_HEIGHT = 18;
+constexpr int RESOURCE_HEIGHT = 1;
+constexpr int SYSTEM_MESSAGE_HEIGHT = 8;
 
 static constexpr int COLOR_DEFAULT = 15;
 static constexpr int COLOR_CURSOR = 112;

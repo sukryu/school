@@ -44,12 +44,11 @@ void Game::outro() {
 }
 
 void Game::init() {
-    init_buildings();
+    init_resources();
     init_terrain();
+    init_buildings();
     init_sandworms();
     init_harvesters();
-    init_resources();
-    init_map();
     init_display();
 
     // 초기화 완료 메시지 표시
@@ -92,8 +91,8 @@ void Game::init_terrain() {
 
     // 3. 장판(Plate) 배치
     const std::vector<Position> plate_positions = {
-        {30, 30},    // 좌하단
-        {30, 30}     // 우상단
+        {MAP_HEIGHT - 3, 0},    // 좌하단
+        {0, MAP_WIDTH - 3}      // 우상단
     };
 
     for (const auto& pos : plate_positions) {
@@ -155,25 +154,13 @@ void Game::init_harvesters() {
     }
 }
 
-void Game::init_map() {
-    // 기본 지형 설정
-    for (int i = 0; i < MAP_HEIGHT; ++i) {
-        for (int j = 0; j < MAP_WIDTH; ++j) {
-            // 사막 지형 설정
-            map.set_tile(0, { i, j }, ' ');
-        }
-    }
-}
-
 void Game::init_display() {
     // 디스플레이 초기 설정
     display.add_system_message("듄 1.5에 오신 것을 환영합니다");
     display.add_system_message("게임을 시작합니다");
 
     // 명령어 설명 추가
-    display.add_command_message("방향키: 이동");
-    display.add_command_message("B: 건설");
-    display.add_command_message("Q: 종료");
+    display.update_commands({ "방향키: 이동", "Space: 선택", "Q: 종료" });
 }
 
 void Game::run() {
@@ -233,22 +220,24 @@ void Game::handle_selection() {
     Position pos = cursor.get_current_position();
     current_selection.position = pos;
 
-    if (auto unit = map.get_unit_at(pos)) {
+    if (const Unit* unit = map.get_unit_at(pos)) {
         current_selection.type = SelectionType::Unit;
         current_selection.selected_ptr = unit;
     }
-    else if (auto building = map.get_building_at(pos)) {
+    else if (const Building* building = map.get_building_at(pos)) {
         current_selection.type = SelectionType::Building;
         current_selection.selected_ptr = building;
     }
     else {
         current_selection.type = SelectionType::Terrain;
-        current_selection.selected_ptr = &map.get_terrain(pos);
+        current_selection.selected_ptr = &map.get_terrain_manager().get_terrain(pos);
     }
 }
 
 void Game::handle_escape() {
     current_selection.clear();
+    display.update_status("No Selection");
+    display.update_commands({ "B: Build", "T: Train", "Q: Quit" });
 }
 
 void Game::update_selection_display() {
@@ -258,24 +247,27 @@ void Game::update_selection_display() {
     switch (current_selection.type) {
     case SelectionType::Unit:
     {
-        auto unit = static_cast<const Unit*>(current_selection.selected_ptr);
+        const Unit* unit = static_cast<const Unit*>(current_selection.selected_ptr);
         status_text = "Selected Unit: " + std::string(1, unit->get_representation());
         command_text = { "M: Move", "A: Attack", "S: Stop" };
     }
     break;
     case SelectionType::Building:
     {
-        auto building = static_cast<const Building*>(current_selection.selected_ptr);
-        status_text = "Selected Building: " + std::string(1, building->get_representation());
+        const Building* building = static_cast<const Building*>(current_selection.selected_ptr);
+        status_text = "Selected Building: " + std::string(building->get_name());
         command_text = { "B: Build", "T: Train", "C: Cancel" };
     }
     break;
     case SelectionType::Terrain:
     {
-        auto terrain = static_cast<const Terrain*>(current_selection.selected_ptr);
-        status_text = "Desert Terrain";
+        const Terrain* terrain = static_cast<const Terrain*>(current_selection.selected_ptr);
+        status_text = "Selected Terrain: " + std::string(1, terrain->get_representation());
         if (terrain->can_harvest_spice()) {
             command_text = { "H: Harvest Spice" };
+        }
+        else {
+            command_text = { "No Actions Available" };
         }
     }
     break;
