@@ -6,7 +6,7 @@ Game::Game()
     cursor({ 1, 1 }),
     resource{ 100, 1000, 10, 100 },  // 초기 자원 값 설정
     map(MAP_WIDTH, MAP_HEIGHT),
-    display(MAP_WIDTH, MAP_HEIGHT)
+    display(MAP_WIDTH, MAP_HEIGHT, 30)
 {
     init();
 }
@@ -49,86 +49,81 @@ void Game::init() {
     init_buildings();
     init_sandworms();
     init_harvesters();
+    init_air_units();
     init_display();
 
-    // 초기화 완료 메시지 표시
     display.add_system_message("게임 초기화 완료");
 }
 
 void Game::init_resources() {
-    // 기본 자원 설정
     resource = {
-        .spice = 100,        // 초기 스파이스
-        .spice_max = 1000,   // 최대 스파이스 저장량
-        .population = 10,    // 초기 인구
-        .population_max = 100 // 최대 인구
+        .spice = 100,
+        .spice_max = 1000,
+        .population = 10,
+        .population_max = 100
     };
 }
 
 void Game::init_terrain() {
-    // 1. 바위(Rock) 배치
+    // 바위(Rock) 배치
     const std::vector<Position> rock_positions = {
-        {5, 20},    // 중앙 좌측
-        {8, 30},    // 중앙
-        {12, 40},   // 중앙 우측
-        {3, 50},    // 우측 상단
-        {15, 45}    // 우측 하단
+        {5, 20}, {8, 30}, {12, 40}, {3, 50}, {15, 45}
     };
 
     for (const auto& pos : rock_positions) {
         map.set_terrain(pos, TerrainType::Rock);
     }
 
-    // 2. 스파이스 매장지 배치
+    // 스파이스 매장지 배치
     const std::vector<Position> spice_positions = {
-        {15, 4},    // 좌측 하단
-        {2, 55}     // 우측 상단
+        {15, 4}, {2, 55}
     };
 
     for (const auto& pos : spice_positions) {
         map.set_terrain(pos, TerrainType::Spice);
     }
 
-    // 3. 장판(Plate) 배치
+    // 장판(Plate) 배치
     const std::vector<Position> plate_positions = {
-        {MAP_HEIGHT - 3, 0},    // 좌하단
-        {0, MAP_WIDTH - 3}      // 우상단
+        {MAP_HEIGHT - 3, 0}, {0, MAP_WIDTH - 3}
     };
 
     for (const auto& pos : plate_positions) {
         map.set_terrain(pos, TerrainType::Plate);
     }
-
-    // 나머지 영역은 기본적으로 사막(Desert)으로 설정되어 있음
 }
 
 void Game::init_buildings() {
     // Base(B)와 Plate(P) - 좌하단
-    map.add_building(std::make_unique<Building>(
+    map.add_building(std::make_unique<BuildingManager::Building>(
         Camp::common, "Base", "본진", 0, Position{ MAP_HEIGHT - 4, 0 }, 2, 2, UnitType::harvester
     ));
 
     // Base(B)와 Plate(P) - 우상단
-    map.add_building(std::make_unique<Building>(
+    map.add_building(std::make_unique<BuildingManager::Building>(
         Camp::common, "Base", "본진", 0, Position{ 0, MAP_WIDTH - 4 }, 2, 2, UnitType::harvester
     ));
 }
 
 void Game::init_sandworms() {
-    const std::vector<Position> worm_positions = {
-        {3, 15},    // 좌측 상단
-        {12, 45}    // 우측 중앙
-    };
+    // 아군 기지 근처 샌드웜
+    map.add_unit(std::make_unique<UnitManager::Unit>(
+        UnitType::sandworm,
+        Position{ MAP_HEIGHT - 6, 5 }  // 좌하단 기지 근처
+    ));
 
-    for (const auto& pos : worm_positions) {
-        map.add_unit(std::make_unique<Unit>(
-            UnitType::sandworm,
-            0,      // build_cost
-            0,      // population
-            2500,   // speed
-            10000,  // attack_power
-            10000,  // health
-            0,      // sight_range
+    // 적군 기지 근처 샌드웜
+    map.add_unit(std::make_unique<UnitManager::Unit>(
+        UnitType::sandworm,
+        Position{ 5, MAP_WIDTH - 6 }  // 우상단 기지 근처
+    ));
+}
+
+void Game::init_air_units() {
+    for (int i = 0; i < 3; ++i) {
+        Position pos = { rand() % MAP_HEIGHT, rand() % MAP_WIDTH };
+        map.add_unit(std::make_unique<UnitManager::Unit>(
+            UnitType::desert_eagle,
             pos
         ));
     }
@@ -141,7 +136,7 @@ void Game::init_harvesters() {
     };
 
     for (const auto& pos : harvester_positions) {
-        map.add_unit(std::make_unique<Unit>(
+        map.add_unit(std::make_unique<UnitManager::Unit>(
             UnitType::harvester,
             5,      // build_cost
             5,      // population
@@ -155,11 +150,8 @@ void Game::init_harvesters() {
 }
 
 void Game::init_display() {
-    // 디스플레이 초기 설정
     display.add_system_message("듄 1.5에 오신 것을 환영합니다");
     display.add_system_message("게임을 시작합니다");
-
-    // 명령어 설명 추가
     display.update_commands({ "방향키: 이동", "Space: 선택", "Q: 종료" });
 }
 
@@ -178,11 +170,14 @@ void Game::run() {
         else if (key == Key::Esc) {
             handle_escape();
         }
-        else if (key == Key::Up || key == Key::Down ||
-            key == Key::Left || key == Key::Right) {
+        else if (is_arrow_key(key)) {
             handle_movement(key);
         }
 
+        // 모든 유닛 업데이트
+        map.get_unit_manager().update_all_units(sys_clock, map);
+
+        map.remove_destroyed_buildings();
         map.update(sys_clock);
         update_selection_display();
         display.update(resource, map, cursor);
@@ -222,15 +217,15 @@ void Game::handle_selection() {
 
     if (const Unit* unit = map.get_unit_at(pos)) {
         current_selection.type = SelectionType::Unit;
-        current_selection.selected_ptr = unit;
+        current_selection.selected_ptr = const_cast<Unit*>(unit);  // const 캐스팅 추가
     }
     else if (const Building* building = map.get_building_at(pos)) {
         current_selection.type = SelectionType::Building;
-        current_selection.selected_ptr = building;
+        current_selection.selected_ptr = const_cast<Building*>(building);  // const 캐스팅 추가
     }
     else {
         current_selection.type = SelectionType::Terrain;
-        current_selection.selected_ptr = &map.get_terrain_manager().get_terrain(pos);
+        current_selection.selected_ptr = const_cast<Terrain*>(&map.get_terrain_manager().get_terrain(pos));  // const 캐스팅 추가
     }
 }
 

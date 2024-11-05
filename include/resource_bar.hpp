@@ -2,6 +2,7 @@
 
 #include "renderer.hpp"
 #include "common.hpp"
+#include <string>
 
 class ResourceBar {
 public:

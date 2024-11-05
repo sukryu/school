@@ -2,6 +2,7 @@
 
 #include "renderer.hpp"
 #include "map.hpp"
+#include "terrain_manager.hpp"
 
 class MapRenderer {
 public:

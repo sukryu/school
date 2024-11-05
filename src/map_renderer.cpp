@@ -1,9 +1,9 @@
 #include "map_renderer.hpp"
 
+using Terrain = TerrainManager::Terrain;
+
 MapRenderer::MapRenderer(int x, int y, int width, int height)
     : x(x), y(y), width(width), height(height) {}
-
-#include "map_renderer.hpp"
 
 void MapRenderer::draw(Renderer& renderer, const Map& map) {
     // 테두리 그리기
@@ -48,6 +48,16 @@ void MapRenderer::draw(Renderer& renderer, const Map& map) {
             char ch = unit->get_representation();
             int color = unit->get_color();
             renderer.draw_char(draw_x, draw_y, ch, color);
+        }
+    }
+
+    // 공중 유닛 렌더링
+    for (const auto& unit : map.get_unit_manager().get_units()) {
+        if (unit->is_air_unit()) {
+            Position pos = unit->get_position();
+            int draw_x = x + pos.column + 1;
+            int draw_y = y + pos.row + 1;
+            renderer.draw_char(draw_x, draw_y, unit->get_representation(), unit->get_color());
         }
     }
 }

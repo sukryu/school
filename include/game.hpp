@@ -15,11 +15,15 @@ public:
     void run();
 
 private:
+    using Unit = UnitManager::Unit;
+    using Building = BuildingManager::Building;
+    using Terrain = TerrainManager::Terrain;
     void init();
     void init_resources();
     void init_buildings();
     void init_terrain();
     void init_sandworms();
+    void init_air_units();
     void init_harvesters();
     void init_map();
     void init_display();

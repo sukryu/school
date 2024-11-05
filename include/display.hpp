@@ -11,7 +11,7 @@
 
 class Display {
 public:
-    Display(int map_width, int map_height, int status_width = 20);
+    Display(int map_width, int map_height, int status_width = 30);
     void update(const Resource& resource, const Map& map, const Cursor& cursor);
     void add_system_message(const std::string& message);
     void update_status(const std::string& status);
