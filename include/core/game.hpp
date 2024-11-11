@@ -13,14 +13,14 @@ namespace dune {
 	namespace core {
         class Game {
         public:
-            Game();
-            void run();
-
-        private:
             using Unit = managers::UnitManager::Unit;
             using Building = managers::BuildingManager::Building;
             using Terrain = managers::TerrainManager::Terrain;
 
+            Game();
+            void run();
+
+        private:
             // 초기화 함수들
             void init();
             void init_resources();
@@ -49,10 +49,10 @@ namespace dune {
             Selection current_selection;
 
             // 게임 객체들
+            ui::Display display;
             Map map;
             types::Resource resource;
             ui::Cursor cursor;
-            ui::Display display;
         };
 	} // namespace core
 } // namespace dune

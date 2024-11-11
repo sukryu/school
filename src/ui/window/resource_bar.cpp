@@ -1,4 +1,5 @@
 #include "../include/ui/window/resource_bar.hpp"
+#include <string>
 
 namespace dune {
     namespace ui {
@@ -10,15 +11,15 @@ namespace dune {
             current_resource = resource;
         }
 
-        std::string ResourceBar::format_resource_info() const {
-            return "Spice: " + std::to_string(current_resource.spice) +
-                "/" + std::to_string(current_resource.spice_max) +
-                "  Pop: " + std::to_string(current_resource.population) +
-                "/" + std::to_string(current_resource.population_max);
+        std::wstring ResourceBar::format_resource_info() const {
+            return L"Spice: " + std::to_wstring(current_resource.spice) +
+                L"/" + std::to_wstring(current_resource.spice_max) +
+                L"  Pop: " + std::to_wstring(current_resource.population) +
+                L"/" + std::to_wstring(current_resource.population_max);
         }
 
         void ResourceBar::draw(Renderer& renderer) {
-            std::string resource_info = format_resource_info();
+            std::wstring resource_info = format_resource_info();
             draw_text(renderer, 0, 0, resource_info, constants::color::RESOURCE);
         }
     } // namespace ui

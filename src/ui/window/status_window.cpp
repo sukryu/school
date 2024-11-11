@@ -6,7 +6,7 @@ namespace dune {
         StatusWindow::StatusWindow(int x, int y, int width, int height)
             : BaseWindow(x, y, width, height) {}
 
-        void StatusWindow::update_status(const std::string& status) {
+        void StatusWindow::update_status(const std::wstring& status) {
             status_text = status;
         }
 

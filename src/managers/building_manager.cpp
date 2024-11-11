@@ -7,7 +7,7 @@ namespace dune {
     namespace managers {
 
         // Building 클래스 구현
-        BuildingManager::Building::Building(types::Camp type, std::string name, std::string description,
+        BuildingManager::Building::Building(types::Camp type, std::wstring name, std::wstring description,
             int build_cost, types::Position pos, int width, int height, types::UnitType produced_unit)
             : type(type)
             , name(std::move(name))
@@ -19,16 +19,16 @@ namespace dune {
             , produced_unit(produced_unit)
             , health(constants::DEFAULT_HEALTH) {}
 
-        char BuildingManager::Building::get_representation() const {
-            if (name == "Base") return 'B';
-            if (name == "Plate") return 'P';
-            if (name == "Dormitory") return 'D';
-            if (name == "Garage") return 'G';
-            if (name == "Barracks") return 'K';
-            if (name == "Shelter") return 'S';
-            if (name == "Arena") return 'A';
-            if (name == "Factory") return 'F';
-            return '?';
+        wchar_t BuildingManager::Building::get_representation() const {
+            if (name == L"Base") return L'B';
+            if (name == L"Plate") return L'P';
+            if (name == L"Dormitory") return L'D';
+            if (name == L"Garage") return L'G';
+            if (name == L"Barracks") return L'K';
+            if (name == L"Shelter") return L'S';
+            if (name == L"Arena") return L'A';
+            if (name == L"Factory") return L'F';
+            return L'?';
         }
 
         int BuildingManager::Building::get_color() const {
@@ -41,12 +41,12 @@ namespace dune {
         }
 
         void BuildingManager::Building::print_info() const {
-            std::cout << "Building: " << name
-                << ", Description: " << description
-                << ", Cost: " << building_cost
-                << ", Position: (" << pos.row << ", " << pos.column << ")"
-                << ", Size: " << width << "x" << height
-                << ", Health: " << health << std::endl;
+            std::wcout << L"Building: " << name
+                << L", Description: " << description
+                << L", Cost: " << building_cost
+                << L", Position: (" << pos.row << L", " << pos.column << L")"
+                << L", Size: " << width << L"x" << height
+                << L", Health: " << health << std::endl;
         }
 
         void BuildingManager::Building::move(types::Direction d) {

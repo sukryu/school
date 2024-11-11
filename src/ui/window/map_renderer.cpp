@@ -15,7 +15,7 @@ namespace dune {
             draw_terrain(renderer, map);
             draw_buildings(renderer, map);
             draw_ground_units(renderer, map);
-            draw_air_units(renderer, map);
+            //draw_air_units(renderer, map);
         }
 
         void MapRenderer::draw_terrain(Renderer& renderer, const core::Map& map) {
@@ -23,7 +23,7 @@ namespace dune {
                 for (int col = 0; col < width - 2; ++col) {
                     types::Position pos{ row, col };
                     const auto& terrain = map.get_terrain_manager().get_terrain(pos);
-                    char ch = terrain.get_representation();
+                    wchar_t ch = terrain.get_representation();
                     int color = terrain.get_color();
                     renderer.draw_char(x + col + 1, y + row + 1, ch, color);
                 }
@@ -50,7 +50,7 @@ namespace dune {
 
         void MapRenderer::draw_ground_units(Renderer& renderer, const core::Map& map) {
             for (const auto& unit : map.get_unit_manager().get_units()) {
-                if (!unit->is_air_unit()) {
+                if (unit->get_type() != types::UnitType::DesertEagle) {
                     types::Position pos = unit->get_position();
                     int draw_x = x + pos.column + 1;
                     int draw_y = y + pos.row + 1;
@@ -64,7 +64,7 @@ namespace dune {
             }
         }
 
-        void MapRenderer::draw_air_units(Renderer& renderer, const core::Map& map) {
+        /*void MapRenderer::draw_air_units(Renderer& renderer, const core::Map& map) {
             for (const auto& unit : map.get_unit_manager().get_units()) {
                 if (unit->is_air_unit()) {
                     types::Position pos = unit->get_position();
@@ -78,6 +78,6 @@ namespace dune {
                     }
                 }
             }
-        }
+        }*/
     } // namespace ui
 } // namespace dune

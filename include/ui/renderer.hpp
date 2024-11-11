@@ -13,13 +13,13 @@ namespace dune {
 
             // 기본 그리기 함수들
             void clear();
-            void draw_char(int x, int y, char ch, int color = constants::color::DEFAULT);
-            void draw_string(int x, int y, const std::string& str, int color = constants::color::DEFAULT);
+            void draw_char(int x, int y, wchar_t ch, int color = constants::color::DEFAULT);
+            void draw_string(int x, int y, const std::wstring& str, int color = constants::color::DEFAULT);
             void draw_border(int x, int y, int width, int height);
             void render();
 
             // 상태 확인
-            char get_char_at(int x, int y) const;
+            wchar_t get_char_at(int x, int y) const;
             int get_color_at(int x, int y) const;
             bool is_valid_position(int x, int y) const;
 
@@ -30,8 +30,8 @@ namespace dune {
         private:
             int width;
             int height;
-            std::vector<std::vector<char>> back_buffer;
-            std::vector<std::vector<char>> front_buffer;
+            std::vector<std::vector<wchar_t>> back_buffer;
+            std::vector<std::vector<wchar_t>> front_buffer;
             std::vector<std::vector<int>> color_buffer;
             std::vector<std::vector<int>> front_color_buffer;
 

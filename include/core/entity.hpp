@@ -8,7 +8,7 @@ namespace dune {
             virtual ~Entity() = default;
 
             // 기본 인터페이스
-            virtual char get_representation() const = 0;
+            virtual wchar_t get_representation() const = 0;
             virtual int get_color() const = 0;
             virtual void print_info() const = 0;
             virtual types::Position get_position() const = 0;

@@ -12,7 +12,7 @@ namespace dune {
                 explicit Terrain(types::TerrainType type = types::TerrainType::Desert);
 
                 // Entity 인터페이스 구현
-                char get_representation() const override;
+                wchar_t get_representation() const override;
                 int get_color() const override;
                 void print_info() const override;
                 types::Position get_position() const override { return pos; }

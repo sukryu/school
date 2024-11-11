@@ -13,14 +13,14 @@ namespace dune {
 
         // UI 관련
         constexpr int RESOURCE_HEIGHT = 1;
-        constexpr int SYSTEM_MESSAGE_HEIGHT = 8;
+        constexpr int SYSTEM_MESSAGE_HEIGHT = 15;
         constexpr int DEFAULT_STATUS_WIDTH = 30;
 
         // 게임 관련
         constexpr int DEFAULT_HEALTH = 100;
         constexpr int SANDSTORM_SIZE = 2;
         constexpr int SANDSTORM_DAMAGE = 50;
-        constexpr int SANDWORM_SPEED = 500;
+        constexpr int SANDWORM_SPEED = 1000;
         constexpr int HARVESTER_SPEED = 2000;
 
         // 색상 관련

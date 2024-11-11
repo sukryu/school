@@ -1,19 +1,19 @@
 #pragma once
 #include "../utils/types.hpp"
+#include "../managers/terrain_manager.hpp"
+#include "../managers/building_manager.hpp"
+#include "../managers/unit_manager.hpp"
 #include <variant>
 
-// 전방 선언
 namespace dune {
-    namespace managers {
-        class TerrainManager;
-        class BuildingManager;
-        class UnitManager;
-    }
-
     namespace core {
 
         class Selection {
         public:
+            using Unit = managers::UnitManager::Unit;
+            using Building = managers::BuildingManager::Building;
+            using Terrain = managers::TerrainManager::Terrain;
+
             Selection() = default;
 
             void clear() {
@@ -22,14 +22,46 @@ namespace dune {
                 selected_ptr = std::monostate{};
             }
 
-            template<typename T>
-            T* get_selected() {
-                return std::get_if<T*>(&selected_ptr);
+            Unit* get_selected(Unit*) {
+                if (auto* ptr = std::get_if<Unit*>(&selected_ptr)) {
+                    return *ptr;
+                }
+                return nullptr;
             }
 
-            template<typename T>
-            const T* get_selected() const {
-                return std::get_if<T*>(&selected_ptr);
+            const Unit* get_selected(Unit*) const {
+                if (auto* ptr = std::get_if<Unit*>(&selected_ptr)) {
+                    return *ptr;
+                }
+                return nullptr;
+            }
+
+            Building* get_selected(Building*) {
+                if (auto* ptr = std::get_if<Building*>(&selected_ptr)) {
+                    return *ptr;
+                }
+                return nullptr;
+            }
+
+            const Building* get_selected(Building*) const {
+                if (auto* ptr = std::get_if<Building*>(&selected_ptr)) {
+                    return *ptr;
+                }
+                return nullptr;
+            }
+
+            Terrain* get_selected(Terrain*) {
+                if (auto* ptr = std::get_if<const Terrain*>(&selected_ptr)) {
+                    return const_cast<Terrain*>(*ptr);
+                }
+                return nullptr;
+            }
+
+            const Terrain* get_selected(Terrain*) const {
+                if (auto* ptr = std::get_if<const Terrain*>(&selected_ptr)) {
+                    return *ptr;
+                }
+                return nullptr;
             }
 
             types::SelectionType get_type() const { return type; }
@@ -39,17 +71,9 @@ namespace dune {
             types::Position position = { 0, 0 };
 
         private:
-            using TerrainPtr = const managers::TerrainManager::Terrain*;
-            using BuildingPtr = managers::BuildingManager::Building*;
-            using UnitPtr = managers::UnitManager::Unit*;
+            std::variant<std::monostate, const Terrain*, Building*, Unit*> selected_ptr;
 
-            std::variant<std::monostate, TerrainPtr, BuildingPtr, UnitPtr> selected_ptr;
-
-            // friend 선언
             friend class Game;
-            friend class managers::BuildingManager;
-            friend class managers::UnitManager;
-            friend class managers::TerrainManager;
         };
 
     } // namespace core

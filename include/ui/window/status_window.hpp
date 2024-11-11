@@ -8,13 +8,13 @@ namespace dune {
         class StatusWindow : public BaseWindow {
         public:
             StatusWindow(int x, int y, int width, int height);
-            void update_status(const std::string& status);
+            void update_status(const std::wstring& status);
             void draw(Renderer& renderer) override;
 
-            const std::string& get_current_status() const { return status_text; }
+            const std::wstring& get_current_status() const { return status_text; }
 
         private:
-            std::string status_text;
+            std::wstring status_text;
         };
     } // namespace ui
 } // namespace dune

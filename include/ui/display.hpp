@@ -17,9 +17,9 @@ namespace dune {
             Display(int map_width, int map_height, int status_width = constants::DEFAULT_STATUS_WIDTH);
 
             void update(const types::Resource& resource, const core::Map& map, const Cursor& cursor);
-            void add_system_message(const std::string& message);
-            void update_status(const std::string& status);
-            void update_commands(const std::vector<std::string>& commands);
+            void add_system_message(const std::wstring& message);
+            void update_status(const std::wstring& status);
+            void update_commands(const std::vector<std::wstring>& commands);
 
             // 접근자
             MessageWindow& get_message_window() { return message_window; }

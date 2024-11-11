@@ -8,14 +8,14 @@ namespace dune {
         TerrainManager::Terrain::Terrain(types::TerrainType type)
             : type(type) {}
 
-        char TerrainManager::Terrain::get_representation() const {
+        wchar_t TerrainManager::Terrain::get_representation() const {
             switch (type) {
-            case types::TerrainType::Desert: return ' ';
-            case types::TerrainType::Plate:  return 'P';
-            case types::TerrainType::Rock:   return 'R';
-            case types::TerrainType::Spice:  return '5';
-            case types::TerrainType::Empty:  return '#';
-            default: return '?';
+            case types::TerrainType::Desert: return L' ';
+            case types::TerrainType::Plate:  return L'P';
+            case types::TerrainType::Rock:   return L'R';
+            case types::TerrainType::Spice:  return L'5';
+            case types::TerrainType::Empty:  return L'#';
+            default: return L'?';
             }
         }
 

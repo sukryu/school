@@ -11,8 +11,8 @@ namespace dune {
             , game_state(types::GameState::Initial)
             , cursor({ 1, 1 })
             , resource{ 100, 1000, 10, 100 }
-            , map(constants::MAP_WIDTH, constants::MAP_HEIGHT)
             , display(constants::MAP_WIDTH, constants::MAP_HEIGHT, constants::DEFAULT_STATUS_WIDTH)
+            , map(constants::MAP_WIDTH, constants::MAP_HEIGHT, &display.get_message_window())
         {
             init();
         }
@@ -26,7 +26,7 @@ namespace dune {
             //init_air_units();
             init_display();
 
-            display.add_system_message("게임 초기화 완료");
+            display.add_system_message(L"Game initialization complete");
         }
 
         void Game::init_resources() {
@@ -71,8 +71,8 @@ namespace dune {
             // Base(B)와 Plate(P) - 좌하단
             map.add_building(std::make_unique<managers::BuildingManager::Building>(
                 types::Camp::Common,
-                std::string("Base"),
-                std::string("본진"),
+                std::wstring(L"Base"),
+                std::wstring(L"본진"),
                 0,
                 types::Position{ constants::MAP_HEIGHT - 4, 0 },
                 2, 2,
@@ -82,8 +82,8 @@ namespace dune {
             // Base(B)와 Plate(P) - 우상단
             map.add_building(std::make_unique<managers::BuildingManager::Building>(
                 types::Camp::Common,
-                std::string("Base"),
-                std::string("본진"),
+                std::wstring(L"Base"),
+                std::wstring(L"본진"),
                 0,
                 types::Position{ 0, constants::MAP_WIDTH - 4 },
                 2, 2,
@@ -124,18 +124,18 @@ namespace dune {
         }
 
         void Game::init_display() {
-            display.add_system_message("듄 1.5에 오신 것을 환영합니다");
-            display.add_system_message("게임을 시작합니다");
-            display.update_commands({ "방향키: 이동", "Space: 선택", "Q: 종료" });
+            display.add_system_message(L"Welcome to Dune 1.5");
+            display.add_system_message(L"Starting Game!");
+            display.update_commands({ L"Arrow keys: Move", L"Space: Select", L"Q: Exit" });
         }
 
         void Game::intro() {
             IO::clear_screen();
             IO::set_color(constants::color::DEFAULT);
 
-            std::cout << "\n\n\n";
-            std::cout << "        DUNE 1.5\n";
-            std::cout << "\n        Loading...\n";
+            std::wcout << L"\n\n\n";
+            std::wcout << L"        DUNE 1.5\n";
+            std::wcout << L"\n        Loading...\n";
 
             std::this_thread::sleep_for(std::chrono::seconds(2));
             IO::clear_screen();
@@ -145,9 +145,9 @@ namespace dune {
             IO::clear_screen();
             IO::set_color(constants::color::DEFAULT);
 
-            std::cout << "\n\n\n";
-            std::cout << "        게임을 종료합니다...\n";
-            std::cout << "\n        Thank you for playing!\n";
+            std::wcout << L"\n\n\n";
+            std::wcout << L"        게임을 종료합니다...\n";
+            std::wcout << L"\n        Thank you for playing!\n";
 
             std::this_thread::sleep_for(std::chrono::milliseconds(500));
             std::exit(0);
@@ -231,47 +231,46 @@ namespace dune {
 
         void Game::handle_escape() {
             current_selection.clear();
-            display.update_status("No Selection");
-            display.update_commands({ "B: Build", "T: Train", "Q: Quit" });
+            display.update_status(L"No Selection");
+            display.update_commands({ L"B: Build", L"T: Train", L"Q: Quit" });
         }
 
         void Game::update_selection_display() {
-            std::string status_text;
-            std::vector<std::string> command_text;
+            std::wstring status_text;
+            std::vector<std::wstring> command_text;
 
             switch (current_selection.type) {
             case types::SelectionType::Unit:
-                if (auto* unit = current_selection.get_selected<Unit>()) {
-                    status_text = "Selected Unit: " + std::string(1, unit->get_representation());
-                    command_text = { "M: Move", "A: Attack", "S: Stop" };
+                if (auto* unit = current_selection.get_selected((Unit*)nullptr)) {
+                    status_text = L"Selected Unit: " + std::wstring(1, unit->get_representation());
+                    command_text = { L"M: Move", L"A: Attack", L"S: Stop" };
                 }
                 break;
             case types::SelectionType::Building:
-                if (auto* building = current_selection.get_selected<Building>()) {
-                    status_text = "Selected Building: " + building->get_name();
-                    command_text = { "B: Build", "T: Train", "C: Cancel" };
+                if (auto* building = current_selection.get_selected((Building*)nullptr)) {
+                    status_text = L"Selected Building: " + building->get_name();
+                    command_text = { L"B: Build", L"T: Train", L"C: Cancel" };
                 }
                 break;
             case types::SelectionType::Terrain:
-                if (auto* terrain = current_selection.get_selected<Terrain>()) {
-                    status_text = "Selected Terrain: " + std::string(1, terrain->get_representation());
+                if (auto* terrain = current_selection.get_selected((Terrain*)nullptr)) {
+                    status_text = L"Selected Terrain: " + std::wstring(1, terrain->get_representation());
                     if (terrain->can_harvest_spice()) {
-                        command_text = { "H: Harvest Spice" };
+                        command_text = { L"H: Harvest Spice" };
                     }
                     else {
-                        command_text = { "No Actions Available" };
+                        command_text = { L"No Actions Available" };
                     }
                 }
                 break;
             default:
-                status_text = "No Selection";
-                command_text = { "B: Build", "T: Train", "Q: Quit" };
+                status_text = L"No Selection";
+                command_text = { L"B: Build", L"T: Train", L"Q: Quit" };
                 break;
             }
 
             display.update_status(status_text);
             display.update_commands(command_text);
         }
-
     } // namespace core
 } // namespace dune

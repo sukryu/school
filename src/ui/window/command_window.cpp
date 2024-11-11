@@ -6,7 +6,7 @@ namespace dune {
         CommandWindow::CommandWindow(int x, int y, int width, int height)
             : BaseWindow(x, y, width, height) {}
 
-        void CommandWindow::update_commands(const std::vector<std::string>& new_commands) {
+        void CommandWindow::update_commands(const std::vector<std::wstring>& new_commands) {
             commands = new_commands;
         }
 

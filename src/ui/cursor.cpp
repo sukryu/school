@@ -28,7 +28,7 @@ namespace dune {
         void Cursor::restore_previous_position(Renderer& renderer, const core::Map& map) const {
             int map_x = previous.column;
             int map_y = previous.row;
-            char ch = ' ';
+            wchar_t ch = L' ';
             int color = constants::color::DEFAULT;
 
             const auto& terrain = map.get_terrain_manager().get_terrain({ map_y, map_x });
@@ -52,7 +52,7 @@ namespace dune {
         void Cursor::draw_cursor(Renderer& renderer) const {
             int draw_x = current.column + 1;
             int draw_y = current.row + constants::RESOURCE_HEIGHT + 1;
-            renderer.draw_char(draw_x, draw_y, ' ', constants::color::CURSOR);
+            renderer.draw_char(draw_x, draw_y, L' ', constants::color::CURSOR);
         }
     } // namespace ui
 } // namespace dune

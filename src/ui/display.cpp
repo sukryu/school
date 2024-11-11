@@ -31,15 +31,15 @@ namespace dune {
             renderer.render();
         }
 
-        void Display::add_system_message(const std::string& message) {
+        void Display::add_system_message(const std::wstring& message) {
             message_window.add_message(message);
         }
 
-        void Display::update_status(const std::string& status) {
+        void Display::update_status(const std::wstring& status) {
             status_window.update_status(status);
         }
 
-        void Display::update_commands(const std::vector<std::string>& commands) {
+        void Display::update_commands(const std::vector<std::wstring>& commands) {
             command_window.update_commands(commands);
         }
 

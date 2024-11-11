@@ -13,7 +13,7 @@ namespace dune {
 
         private:
             types::Resource current_resource;
-            std::string format_resource_info() const;
+            std::wstring format_resource_info() const;
         };
     } // namespace ui
 } // namespace dune
