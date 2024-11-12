@@ -25,7 +25,8 @@ namespace dune {
 
         // 색상 관련
         namespace color {
-            constexpr int DEFAULT = 15;
+	    constexpr int DEFAULT = 7;
+            //constexpr int DEFAULT = 15;
             constexpr int CURSOR = 112;
             constexpr int RESOURCE = 112;
             constexpr int ART_LADIES = 9;   // Blue
