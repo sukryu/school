@@ -16,7 +16,26 @@ namespace dune {
             , sight_range(sight_range)
             , pos(pos)
             , length(1)
-            , last_move_time(0) {}
+            , last_move_time(0) {
+                switch(type) {
+                case types::UnitType::Harvester:
+                    build_cost = 5;
+                    population = 5;
+                    speed = constants::HARVESTER_SPEED;
+                    attack_power = 0;
+                    health = 70;
+                    sight_range = 0;
+                    break;
+                default:
+                    build_cost = 5;
+                    population = 5;
+                    speed = 0;
+                    attack_power = 0;
+                    health = 70;
+                    sight_range = 0;
+                    break;
+                }
+            }
 
         UnitManager::Unit::Unit(types::UnitType type, types::Position pos)
             : type(type)
