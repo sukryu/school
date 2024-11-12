@@ -211,9 +211,39 @@ namespace dune {
             }
         }
 
+        void Game::handle_build_plate() {
+            types::Position pos = cursor.get_current_position();
+            
+            // 2x2 크기의 장판 생성
+            auto plate = std::make_unique<BuildingManager::Building>(
+                Camp::Common,
+                L"Plate",
+                L"건물 건설용 장판",
+                0,  // 건설 비용
+                pos,
+                2,  // width
+                2,  // height
+                UnitType::None
+            );
+
+            // 설치 가능 여부 확인
+            if (plate->is_placeable(pos, map.get_terrain_manager())) {
+                map.add_building(std::move(plate));
+                display.add_system_message(L"The board has been installed.");
+            } else {
+                display.add_system_message(L"The board cannot be installed in this location.");
+            }
+        }
+
         void Game::handle_selection() {
             types::Position pos = cursor.get_current_position();
             current_selection.position = pos;
+
+            auto key = IO::get_key();
+            if (key == Key::Build_Plate) {
+                handle_build_plate();
+                return;
+            }
 
             if (const Unit* unit = map.get_entity_at<Unit>(pos)) {
                 current_selection.type = types::SelectionType::Unit;

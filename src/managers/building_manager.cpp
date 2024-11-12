@@ -1,4 +1,5 @@
 #include "../include/managers/building_manager.hpp"
+#include "managers/terrain_manager.hpp"
 #include "../include/utils/constants.hpp"
 #include "../include/utils/utils.hpp"
 #include <iostream>

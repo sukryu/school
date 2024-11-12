@@ -14,21 +14,25 @@ namespace dune {
                 return types::Key::None;
             }
 
-            wint_t byte = _getwch(); // 변경: _getch() -> _getwch()
+            wint_t byte = _getwch();
             types::Key current_key;
 
             switch (byte) {
-            case L'q': case L'Q': // 변경: 'q' -> L'q'
+            case L'q': case L'Q':
                 current_key = types::Key::Quit;
                 break;
-            case L' ': // 변경: ' ' -> L' '
+            case L' ': 
                 current_key = types::Key::Space;
                 break;
             case 27:  // ESC
                 current_key = types::Key::Esc;
                 break;
+            case 'p':
+            case 'P':
+                current_key = types::Key::Build_Plate;
+                break;
             case 224: case 0: {  // Special keys (arrows)
-                byte = _getwch(); // 변경: _getch() -> _getwch()
+                byte = _getwch();
                 switch (byte) {
                 case 72:  // Up arrow
                     current_key = types::Key::Up;

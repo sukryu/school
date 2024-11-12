@@ -37,6 +37,7 @@ namespace dune {
             void outro();
             void handle_movement(types::Key key);
             void handle_selection();
+            void handle_build_plate();
             void handle_escape();
             void update_selection_display();
             void process_input();

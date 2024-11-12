@@ -66,6 +66,7 @@ namespace dune {
             Attack,
             Stop,
             Cancel,
+            Build_Plate,
             Undefined
         };
 
