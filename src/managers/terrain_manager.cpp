@@ -1,5 +1,6 @@
 #include "../include/managers/terrain_manager.hpp"
 #include "../include/utils/constants.hpp"
+#include <iostream>
 
 namespace dune {
     namespace managers {
@@ -21,7 +22,7 @@ namespace dune {
 
         int TerrainManager::Terrain::get_color() const {
             switch (type) {
-            case types::TerrainType::Desert: return constants::color::DEFAULT;
+            case types::TerrainType::Desert: return constants::color::DESERT;
             case types::TerrainType::Plate:  return constants::color::PLATE;
             case types::TerrainType::Rock:   return constants::color::OTHER;
             case types::TerrainType::Spice:  return constants::color::SPICE;
@@ -31,7 +32,23 @@ namespace dune {
         }
 
         void TerrainManager::Terrain::print_info() const {
-            // TODO: 필요한 경우 구현
+            std::wcout << L"Terrain Type: ";
+            switch (type) {
+            case types::TerrainType::Desert:
+                std::wcout << L"Desert\n";
+                break;
+            case types::TerrainType::Plate:
+                std::wcout << L"Plate\n";
+                break;
+            case types::TerrainType::Rock:
+                std::wcout << L"Rock\n";
+                break;
+            case types::TerrainType::Spice:
+                std::wcout << L"Spice\n";
+                break;
+            default:
+                std::wcout << L"Unknown\n";
+            }
         }
 
         bool TerrainManager::Terrain::is_buildable() const {

@@ -6,7 +6,7 @@ namespace dune {
     namespace managers {
 
         UnitManager::Unit::Unit(types::UnitType type, int build_cost, int population, int speed,
-            int attack_power, int health, int sight_range, types::Position pos)
+            int attack_power, int health, int sight_range, types::Position pos, types::Camp camp)
             : type(type)
             , build_cost(build_cost)
             , population(population)
@@ -16,7 +16,9 @@ namespace dune {
             , sight_range(sight_range)
             , pos(pos)
             , length(1)
-            , last_move_time(0) {
+            , last_move_time(0)
+            , camp(camp)
+        {
                 switch(type) {
                 case types::UnitType::Harvester:
                     build_cost = 5;
@@ -74,8 +76,12 @@ namespace dune {
         }
 
         int UnitManager::Unit::get_color() const {
+            if (type == types::UnitType::Harvester) {
+                return (camp == types::Camp::ArtLadies) ? constants::color::ART_LADIES :
+                    (camp == types::Camp::Harkonnen) ? constants::color::HARKONNEN :
+                    constants::color::OTHER;
+            }
             switch (type) {
-            case types::UnitType::Harvester:  return constants::color::OTHER;
             case types::UnitType::Fremen:     return constants::color::ART_LADIES;
             case types::UnitType::Soldier:    return constants::color::ART_LADIES;
             case types::UnitType::Fighter:    return constants::color::HARKONNEN;

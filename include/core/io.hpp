@@ -32,6 +32,9 @@ namespace dune {
             }
 
             static types::Key get_key();
+            /**
+            * PDF 2. 더블클릭
+            */
             static bool is_double_click();
 
         private:

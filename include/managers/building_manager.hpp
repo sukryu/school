@@ -1,6 +1,7 @@
 #pragma once
 #include "../core/entity.hpp"
 #include "../utils/types.hpp"
+#include "managers/terrain_manager.hpp"
 #include <memory>
 #include <vector>
 #include <string>
@@ -33,7 +34,7 @@ namespace dune {
                 void take_damage(int damage);
                 bool is_destroyed() const { return health <= 0; }
                 types::UnitType get_produced_unit() const { return produced_unit; }
-                bool is_placeable(const types::Position& pos, const TerrainManager& terrain_manager) const {
+                bool is_placeable(const types::Position& pos, const managers::TerrainManager& terrain_manager) const {
                     for(int i = 0; i < height; ++i) {
                         for(int j = 0; j < width; ++j) {
                             types::Position check_pos = {pos.row + i, pos.column + j};

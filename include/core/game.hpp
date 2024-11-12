@@ -37,7 +37,15 @@ namespace dune {
             void outro();
             void handle_movement(types::Key key);
             void handle_selection();
+            /**
+            * PDF 장판 설치
+            */
             void handle_build_plate();
+            types::Position find_empty_space_near_building(const Building* building);
+            /**
+            * PDF 4. 하베스터 생산
+            */
+            void handle_build_harvester(const Building* building);
             void handle_escape();
             void update_selection_display();
             void process_input();

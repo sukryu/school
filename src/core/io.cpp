@@ -31,6 +31,10 @@ namespace dune {
             case 'P':
                 current_key = types::Key::Build_Plate;
                 break;
+            case 'h':
+            case 'H':
+                current_key = types::Key::Build_Harvester;
+                break;
             case 224: case 0: {  // Special keys (arrows)
                 byte = _getwch();
                 switch (byte) {

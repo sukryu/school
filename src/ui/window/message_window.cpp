@@ -3,6 +3,9 @@
 #include <codecvt>
 #include "utils/constants.hpp"
 
+/**
+* PDF 5. 시스템 메시지
+*/
 namespace dune {
     namespace ui {
 

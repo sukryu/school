@@ -34,7 +34,7 @@ namespace dune {
 
         int BuildingManager::Building::get_color() const {
             switch (type) {
-            case types::Camp::Common:      return constants::color::OTHER;
+            case types::Camp::Common:      return constants::color::ART_LADIES;
             case types::Camp::ArtLadies:  return constants::color::ART_LADIES;
             case types::Camp::Harkonnen:   return constants::color::HARKONNEN;
             default: return constants::color::OTHER;

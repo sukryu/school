@@ -67,6 +67,7 @@ namespace dune {
             Stop,
             Cancel,
             Build_Plate,
+            Build_Harvester,
             Undefined
         };
 

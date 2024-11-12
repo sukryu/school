@@ -95,6 +95,9 @@ namespace dune {
             }
         }
 
+        /**
+        * PDF 3. 샌드웜
+        */
         void Map::update_sandworm(Unit* sandworm, std::chrono::milliseconds current_time) {
             if (!sandworm->is_ready_to_move(current_time)) {
                 return;

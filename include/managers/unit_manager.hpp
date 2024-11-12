@@ -14,7 +14,7 @@ namespace dune {
             public:
                 // 일반 유닛용 생성자
                 Unit(types::UnitType type, int build_cost, int population, int speed,
-                    int attack_power, int health, int sight_range, types::Position pos);
+                    int attack_power, int health, int sight_range, types::Position pos, types::Camp camp = types::Camp::Common);
 
                 // 특수 유닛용 생성자 (Sandworm)
                 Unit(types::UnitType type, types::Position pos);
@@ -45,6 +45,7 @@ namespace dune {
                 bool should_excrete() const { return length > 1 && (rand() % 100 < 30); }
 
             private:
+                types::Camp camp;
                 types::UnitType type;
                 int build_cost;
                 int population;
