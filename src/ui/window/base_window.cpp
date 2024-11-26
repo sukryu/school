@@ -1,29 +1,29 @@
-#include "ui/window/base_window.hpp"
-#include "utils/constants.hpp"
+#include "base_window.hpp"
+#include "../../utils/constants.hpp"
 
 namespace dune {
     namespace ui {
 
-        void BaseWindow::draw_border(Renderer& renderer) const {
+        void BaseWindow::drawBorder(Renderer& renderer) const {
             // 상하 테두리
-            for (int i = x; i < x + width; ++i) {
-                renderer.draw_char(i, y, L'#');
-                renderer.draw_char(i, y + height - 1, L'#');
+            for (int i = x_; i < x_ + width_; ++i) {
+                renderer.drawChar(i, y_, L'#');
+                renderer.drawChar(i, y_ + height_ - 1, L'#');
             }
             // 좌우 테두리
-            for (int i = y; i < y + height; ++i) {
-                renderer.draw_char(x, i, L'#');
-                renderer.draw_char(x + width - 1, i, L'#');
+            for (int i = y_; i < y_ + height_; ++i) {
+                renderer.drawChar(x_, i, L'#');
+                renderer.drawChar(x_ + width_ - 1, i, L'#');
             }
         }
 
-        void BaseWindow::draw_text(Renderer& renderer, int rel_x, int rel_y,
+        void BaseWindow::drawText(Renderer& renderer, int relX, int relY,
             const std::wstring& text, int color) const {
-            int draw_x = x + rel_x;
-            int draw_y = y + rel_y;
+            int drawX = x_ + relX;
+            int drawY = y_ + relY;
 
-            for (size_t i = 0; i < text.length() && i < static_cast<size_t>(width - rel_x); ++i) {
-                renderer.draw_char(draw_x + static_cast<int>(i), draw_y, text[i], color);
+            for (size_t i = 0; i < text.length() && i < static_cast<size_t>(width_ - relX); ++i) {
+                renderer.drawChar(drawX + static_cast<int>(i), drawY, text[i], color);
             }
         }
     } // namespace ui

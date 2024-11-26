@@ -1,146 +1,154 @@
-#include "managers/unit_manager.hpp"
-#include "utils/utils.hpp"
+#include "unit_manager.hpp"
+#include "../utils/utils.hpp"
+#include "../utils/constants.hpp"
 #include <iostream>
 
 namespace dune {
     namespace managers {
 
-        UnitManager::Unit::Unit(types::UnitType type, int build_cost, int population, int speed,
-            int attack_power, int health, int sight_range, types::Position pos, types::Camp camp)
-            : type(type)
-            , build_cost(build_cost)
-            , population(population)
-            , speed(speed)
-            , attack_power(attack_power)
-            , health(health)
-            , sight_range(sight_range)
-            , pos(pos)
-            , length(1)
-            , last_move_time(0)
-            , camp(camp)
-        {
-                switch(type) {
-                case types::UnitType::Harvester:
-                    build_cost = 5;
-                    population = 5;
-                    speed = constants::HARVESTER_SPEED;
-                    attack_power = 0;
-                    health = 70;
-                    sight_range = 0;
-                    break;
-                default:
-                    build_cost = 5;
-                    population = 5;
-                    speed = 0;
-                    attack_power = 0;
-                    health = 70;
-                    sight_range = 0;
-                    break;
-                }
-            }
+        // Unit 클래스 구현
 
-        UnitManager::Unit::Unit(types::UnitType type, types::Position pos)
-            : type(type)
-            , pos(pos) {
-            switch (type) {
+        Unit::Unit(types::UnitType type, int buildCost, int population, int speed,
+                   int attackPower, int health, int sightRange, types::Position position,
+                   types::Camp camp)
+            : type_(type), buildCost_(buildCost), population_(population), speed_(speed),
+              attackPower_(attackPower), health_(health), sightRange_(sightRange),
+              position_(position), camp_(camp), lastMoveTime_(0) {
+            // 유닛 타입에 따른 초기화 로직이 필요하면 여기에 추가합니다.
+        }
+
+        Unit::Unit(types::UnitType type, types::Position position)
+            : type_(type), position_(position), lastMoveTime_(0) {
+            switch (type_) {
             case types::UnitType::Sandworm:
-                build_cost = 0;
-                population = 0;
-                speed = constants::SANDWORM_SPEED;
-                attack_power = 9999;
-                health = constants::DEFAULT_HEALTH;
-                sight_range = 999;
-                length = 1;
+                buildCost_ = 0;
+                population_ = 0;
+                speed_ = constants::SANDWORM_SPEED;
+                attackPower_ = 9999;
+                health_ = constants::DEFAULT_HEALTH;
+                sightRange_ = 999;
+                length_ = 1;
+                camp_ = types::Camp::Common;
                 break;
             default:
-                build_cost = 5;
-                population = 2;
-                speed = 1000;
-                attack_power = 10;
-                health = 10;
-                sight_range = 3;
+                buildCost_ = 5;
+                population_ = 2;
+                speed_ = 1000;
+                attackPower_ = 10;
+                health_ = 10;
+                sightRange_ = 3;
+                camp_ = types::Camp::Common;
                 break;
             }
         }
 
-        wchar_t UnitManager::Unit::get_representation() const {
-            switch (type) {
-            case types::UnitType::Harvester: return L'H';
-            case types::UnitType::Fremen: return L'M';
-            case types::UnitType::Soldier: return L'I';
-            case types::UnitType::Fighter: return L'J';
-            case types::UnitType::HeavyTank: return L'T';
-            case types::UnitType::Sandworm: return L'W';
-            default: return L'?';
+        wchar_t Unit::getRepresentation() const {
+            switch (type_) {
+            case types::UnitType::Harvester:  return L'H';
+            case types::UnitType::Fremen:     return L'M';
+            case types::UnitType::Soldier:    return L'I';
+            case types::UnitType::Fighter:    return L'J';
+            case types::UnitType::HeavyTank:  return L'T';
+            case types::UnitType::Sandworm:   return L'W';
+            default:                          return L'?';
             }
         }
 
-        int UnitManager::Unit::get_color() const {
-            if (type == types::UnitType::Harvester) {
-                return (camp == types::Camp::ArtLadies) ? constants::color::ART_LADIES :
-                    (camp == types::Camp::Harkonnen) ? constants::color::HARKONNEN :
-                    constants::color::OTHER;
+        int Unit::getColor() const {
+            if (type_ == types::UnitType::Harvester) {
+                switch (camp_) {
+                case types::Camp::ArtLadies:  return constants::color::ART_LADIES;
+                case types::Camp::Harkonnen:  return constants::color::HARKONNEN;
+                default:                      return constants::color::OTHER;
+                }
             }
-            switch (type) {
+            switch (type_) {
             case types::UnitType::Fremen:     return constants::color::ART_LADIES;
             case types::UnitType::Soldier:    return constants::color::ART_LADIES;
             case types::UnitType::Fighter:    return constants::color::HARKONNEN;
             case types::UnitType::HeavyTank:  return constants::color::HARKONNEN;
             case types::UnitType::Sandworm:   return constants::color::SANDWORM;
-            default: return constants::color::OTHER;
+            default:                          return constants::color::OTHER;
             }
         }
 
-        void UnitManager::Unit::print_info() const {
-            std::wcout << L"Unit Type: " << static_cast<int>(type)
-                << L", Cost: " << build_cost
-                << L", Population: " << population
-                << L", Speed: " << speed
-                << L", Attack: " << attack_power
-                << L", Health: " << health
-                << L", Sight: " << sight_range
-                << L", Position: (" << pos.row << L", " << pos.column << L")\n";
+        void Unit::printInfo() const {
+            std::wcout << L"Unit Type: " << static_cast<int>(type_)
+                       << L", Cost: " << buildCost_
+                       << L", Population: " << population_
+                       << L", Speed: " << speed_
+                       << L", Attack: " << attackPower_
+                       << L", Health: " << health_
+                       << L", Sight: " << sightRange_
+                       << L", Position: (" << position_.row << L", " << position_.column << L")\n";
         }
 
-        void UnitManager::Unit::move(types::Direction d) {
-            pos = utils::move(pos, d);
+        void Unit::move(types::Direction direction) {
+            position_ = utils::move(position_, direction);
+        }
+
+        bool Unit::isReadyToMove(std::chrono::milliseconds currentTime) const {
+            return currentTime - lastMoveTime_ >= std::chrono::milliseconds(speed_);
+        }
+
+        void Unit::updateLastMoveTime(std::chrono::milliseconds currentTime) {
+            lastMoveTime_ = currentTime;
+        }
+
+        void Unit::consumeTarget() {
+            length_ += 1;
+        }
+
+        bool Unit::canExcrete() const {
+            return length_ > 1;
+        }
+
+        void Unit::excrete() {
+            if (length_ > 1) {
+                length_ -= 1;
+            }
+        }
+
+        bool Unit::shouldExcrete() const {
+            return length_ > 1 && (rand() % 100 < 30);
         }
 
         // UnitManager 클래스 구현
-        void UnitManager::add_unit(std::unique_ptr<Unit> unit) {
-            units.push_back(std::move(unit));
+
+        void UnitManager::addUnit(std::unique_ptr<Unit> unit) {
+            units_.push_back(std::move(unit));
         }
 
-        UnitManager::Unit* UnitManager::get_unit_at(const types::Position& pos) {
-            for (auto& unit : units) {
-                if (unit->get_position() == pos) {
+        Unit* UnitManager::getUnitAt(const types::Position& position) {
+            for (auto& unit : units_) {
+                if (unit->getPosition() == position) {
                     return unit.get();
                 }
             }
             return nullptr;
         }
 
-        const UnitManager::Unit* UnitManager::get_unit_at(const types::Position& pos) const {
-            for (const auto& unit : units) {
-                if (unit->get_position() == pos) {
+        const Unit* UnitManager::getUnitAt(const types::Position& position) const {
+            for (const auto& unit : units_) {
+                if (unit->getPosition() == position) {
                     return unit.get();
                 }
             }
             return nullptr;
         }
 
-        void UnitManager::remove_unit(Unit* unit) {
-            units.erase(
-                std::remove_if(units.begin(), units.end(),
+        void UnitManager::removeUnit(Unit* unit) {
+            units_.erase(
+                std::remove_if(units_.begin(), units_.end(),
                     [unit](const std::unique_ptr<Unit>& u) {
                         return u.get() == unit;
                     }),
-                units.end()
+                units_.end()
             );
         }
 
-        const std::vector<std::unique_ptr<UnitManager::Unit>>& UnitManager::get_units() const {
-            return units;
+        const std::vector<std::unique_ptr<Unit>>& UnitManager::getUnits() const {
+            return units_;
         }
 
     } // namespace managers

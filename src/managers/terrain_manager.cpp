@@ -1,16 +1,17 @@
-#include "../include/managers/terrain_manager.hpp"
-#include "../include/utils/constants.hpp"
+#include "terrain_manager.hpp"
+#include "../utils/constants.hpp"
 #include <iostream>
 
 namespace dune {
     namespace managers {
 
         // Terrain 클래스 구현
-        TerrainManager::Terrain::Terrain(types::TerrainType type)
-            : type(type) {}
 
-        wchar_t TerrainManager::Terrain::get_representation() const {
-            switch (type) {
+        Terrain::Terrain(types::TerrainType type, const types::Position& position)
+            : type_(type), position_(position) {}
+
+        wchar_t Terrain::getRepresentation() const {
+            switch (type_) {
             case types::TerrainType::Desert: return L' ';
             case types::TerrainType::Plate:  return L'P';
             case types::TerrainType::Rock:   return L'R';
@@ -20,8 +21,8 @@ namespace dune {
             }
         }
 
-        int TerrainManager::Terrain::get_color() const {
-            switch (type) {
+        int Terrain::getColor() const {
+            switch (type_) {
             case types::TerrainType::Desert: return constants::color::DESERT;
             case types::TerrainType::Plate:  return constants::color::PLATE;
             case types::TerrainType::Rock:   return constants::color::OTHER;
@@ -31,9 +32,9 @@ namespace dune {
             }
         }
 
-        void TerrainManager::Terrain::print_info() const {
+        void Terrain::printInfo() const {
             std::wcout << L"Terrain Type: ";
-            switch (type) {
+            switch (type_) {
             case types::TerrainType::Desert:
                 std::wcout << L"Desert\n";
                 break;
@@ -51,8 +52,8 @@ namespace dune {
             }
         }
 
-        bool TerrainManager::Terrain::is_buildable() const {
-            switch (type) {
+        bool Terrain::isBuildable() const {
+            switch (type_) {
             case types::TerrainType::Desert: return true;
             case types::TerrainType::Plate:  return true;
             case types::TerrainType::Rock:   return false;
@@ -62,8 +63,8 @@ namespace dune {
             }
         }
 
-        bool TerrainManager::Terrain::is_walkable() const {
-            switch (type) {
+        bool Terrain::isWalkable() const {
+            switch (type_) {
             case types::TerrainType::Desert: return true;
             case types::TerrainType::Plate:  return true;
             case types::TerrainType::Rock:   return false;
@@ -73,33 +74,41 @@ namespace dune {
             }
         }
 
-        bool TerrainManager::Terrain::can_harvest_spice() const {
-            return type == types::TerrainType::Spice;
+        bool Terrain::canHarvestSpice() const {
+            return type_ == types::TerrainType::Spice;
         }
 
         // TerrainManager 클래스 구현
+
         TerrainManager::TerrainManager(int width, int height)
-            : width(width)
-            , height(height)
-            , terrain_map(height, std::vector<Terrain>(width, Terrain(types::TerrainType::Desert))) {}
-
-        const TerrainManager::Terrain& TerrainManager::get_terrain(const types::Position& pos) const {
-            static Terrain empty_terrain(types::TerrainType::Empty);
-            if (is_valid_position(pos)) {
-                return terrain_map[pos.row][pos.column];
-            }
-            return empty_terrain;
-        }
-
-        void TerrainManager::set_terrain(const types::Position& pos, types::TerrainType type) {
-            if (is_valid_position(pos)) {
-                terrain_map[pos.row][pos.column] = Terrain(type);
+            : width_(width), height_(height),
+              terrainMap_(height, std::vector<Terrain>(width, Terrain(types::TerrainType::Desert))) {
+            // 각 지형의 위치 설정
+            for (int row = 0; row < height_; ++row) {
+                for (int col = 0; col < width_; ++col) {
+                    types::Position position{ row, col };
+                    terrainMap_[row][col] = Terrain(types::TerrainType::Desert, position);
+                }
             }
         }
 
-        bool TerrainManager::is_valid_position(const types::Position& pos) const {
-            return pos.row >= 0 && pos.row < height &&
-                pos.column >= 0 && pos.column < width;
+        const Terrain& TerrainManager::getTerrain(const types::Position& position) const {
+            static Terrain emptyTerrain(types::TerrainType::Empty);
+            if (isValidPosition(position)) {
+                return terrainMap_[position.row][position.column];
+            }
+            return emptyTerrain;
+        }
+
+        void TerrainManager::setTerrain(const types::Position& position, types::TerrainType type) {
+            if (isValidPosition(position)) {
+                terrainMap_[position.row][position.column] = Terrain(type, position);
+            }
+        }
+        
+        bool TerrainManager::isValidPosition(const types::Position& position) const {
+            return position.row >= 0 && position.row < height_ &&
+                   position.column >= 0 && position.column < width_;
         }
 
     } // namespace managers

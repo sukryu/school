@@ -4,13 +4,13 @@
 
 namespace dune {
     namespace core {
-        std::chrono::steady_clock::time_point IO::last_key_time;
-        types::Key IO::last_key = types::Key::None;
-        bool IO::was_double_click = false;
+        std::chrono::steady_clock::time_point IO::lastKeyTime_;
+        types::Key IO::lastKey_ = types::Key::None;
+        bool IO::wasDoubleClick_ = false;
 
-        types::Key IO::get_key() {
+        types::Key IO::getKey() {
             if (!_kbhit()) {
-                was_double_click = false;
+                wasDoubleClick_ = false;
                 return types::Key::None;
             }
 
@@ -62,35 +62,35 @@ namespace dune {
             }
 
             auto now = std::chrono::steady_clock::now();
-            check_double_click(current_key, now);
+            checkDoubleClick(current_key, now);
 
             if (current_key != types::Key::None) {
-                last_key = current_key;
-                last_key_time = now;
+                lastKey_ = current_key;
+                lastKeyTime_ = now;
             }
 
             return current_key;
         }
 
-        bool IO::is_double_click() {
-            return was_double_click;
+        bool IO::isDoubleClick() {
+            return wasDoubleClick_;
         }
 
-        bool IO::check_double_click(types::Key current_key, std::chrono::steady_clock::time_point now) {
-            if (current_key != last_key) {
-                was_double_click = false;
+        bool IO::checkDoubleClick(types::Key current_key, std::chrono::steady_clock::time_point now) {
+            if (current_key != lastKey_) {
+                wasDoubleClick_ = false;
                 return false;
             }
 
-            auto diff = std::chrono::duration_cast<std::chrono::milliseconds>(now - last_key_time);
-            bool is_double = diff < DOUBLE_CLICK_INTERVAL;
+            auto diff = std::chrono::duration_cast<std::chrono::milliseconds>(now - lastKeyTime_);
+            bool is_double = diff < DOUBLE_CLICK_INTERVAL_;
 
             if (is_double) {
-                was_double_click = true;
-                last_key_time = now - std::chrono::milliseconds(500);
+                wasDoubleClick_ = true;
+                lastKeyTime_ = now - std::chrono::milliseconds(500);
             }
 
-            return was_double_click;
+            return wasDoubleClick_;
         }
     } // namespace core
 } // namespace dune

@@ -1,112 +1,132 @@
-#include "../include/managers/building_manager.hpp"
-#include "managers/terrain_manager.hpp"
-#include "../include/utils/constants.hpp"
-#include "../include/utils/utils.hpp"
+#include "building_manager.hpp"
+#include "terrain_manager.hpp"
+#include "../utils/constants.hpp"
+#include "../utils/utils.hpp"
 #include <iostream>
 
 namespace dune {
     namespace managers {
 
         // Building 클래스 구현
-        BuildingManager::Building::Building(types::Camp type, std::wstring name, std::wstring description,
-            int build_cost, types::Position pos, int width, int height, types::UnitType produced_unit)
-            : type(type)
-            , name(std::move(name))
-            , description(std::move(description))
-            , building_cost(build_cost)
-            , pos(pos)
-            , width(width)
-            , height(height)
-            , produced_unit(produced_unit)
-            , health(constants::DEFAULT_HEALTH) {}
 
-        wchar_t BuildingManager::Building::get_representation() const {
-            if (name == L"Base") return L'B';
-            if (name == L"Plate") return L'P';
-            if (name == L"Dormitory") return L'D';
-            if (name == L"Garage") return L'G';
-            if (name == L"Barracks") return L'K';
-            if (name == L"Shelter") return L'S';
-            if (name == L"Arena") return L'A';
-            if (name == L"Factory") return L'F';
+        BuildingManager::Building::Building(types::Camp type, const std::wstring& name, const std::wstring& description,
+                                            int buildCost, types::Position position, int width, int height, types::UnitType producedUnit)
+            : type_(type)
+            , name_(name)
+            , description_(description)
+            , buildingCost_(buildCost)
+            , position_(position)
+            , width_(width)
+            , height_(height)
+            , producedUnit_(producedUnit)
+            , health_(constants::DEFAULT_HEALTH) {}
+
+        wchar_t BuildingManager::Building::getRepresentation() const {
+            if (name_ == L"Base") return L'B';
+            if (name_ == L"Plate") return L'P';
+            if (name_ == L"Dormitory") return L'D';
+            if (name_ == L"Garage") return L'G';
+            if (name_ == L"Barracks") return L'K';
+            if (name_ == L"Shelter") return L'S';
+            if (name_ == L"Arena") return L'A';
+            if (name_ == L"Factory") return L'F';
             return L'?';
         }
 
-        int BuildingManager::Building::get_color() const {
-            switch (type) {
-            case types::Camp::Common:      return constants::color::ART_LADIES;
+        int BuildingManager::Building::getColor() const {
+            switch (type_) {
+            case types::Camp::Common:     return constants::color::ART_LADIES;
             case types::Camp::ArtLadies:  return constants::color::ART_LADIES;
-            case types::Camp::Harkonnen:   return constants::color::HARKONNEN;
-            default: return constants::color::OTHER;
+            case types::Camp::Harkonnen:  return constants::color::HARKONNEN;
+            default:                      return constants::color::OTHER;
             }
         }
 
-        void BuildingManager::Building::print_info() const {
-            std::wcout << L"Building: " << name
-                << L", Description: " << description
-                << L", Cost: " << building_cost
-                << L", Position: (" << pos.row << L", " << pos.column << L")"
-                << L", Size: " << width << L"x" << height
-                << L", Health: " << health << std::endl;
+        void BuildingManager::Building::printInfo() const {
+            std::wcout << L"Building: " << name_
+                << L", Description: " << description_
+                << L", Cost: " << buildingCost_
+                << L", Position: (" << position_.row << L", " << position_.column << L")"
+                << L", Size: " << width_ << L"x" << height_
+                << L", Health: " << health_ << std::endl;
         }
 
-        void BuildingManager::Building::move(types::Direction d) {
-            pos = dune::utils::move(pos, d);
+        void BuildingManager::Building::move(types::Direction direction) {
+            position_ = dune::utils::move(position_, direction);
         }
 
-        bool BuildingManager::Building::contains(const types::Position& p) const {
-            return p.row >= pos.row && p.row < pos.row + height &&
-                p.column >= pos.column && p.column < pos.column + width;
+        bool BuildingManager::Building::contains(const types::Position& position) const {
+            return position.row >= position_.row && position.row < position_.row + height_ &&
+                   position.column >= position_.column && position.column < position_.column + width_;
         }
 
-        void BuildingManager::Building::take_damage(int damage) {
-            health = std::max(0, health - damage);
+        void BuildingManager::Building::takeDamage(int damage) {
+            health_ = std::max(0, health_ - damage);
+        }
+
+        bool BuildingManager::Building::isPlaceable(const types::Position& position, const TerrainManager& terrainManager) const {
+            for (int i = 0; i < height_; ++i) {
+                for (int j = 0; j < width_; ++j) {
+                    types::Position checkPos = { position.row + i, position.column + j };
+                    // 맵 범위 체크
+                    if (checkPos.row < 0 || checkPos.row >= constants::MAP_HEIGHT ||
+                        checkPos.column < 0 || checkPos.column >= constants::MAP_WIDTH) {
+                        return false;
+                    }
+                    // 지형 체크
+                    if (!terrainManager.getTerrain(checkPos).isBuildable()) {
+                        return false;
+                    }
+                }
+            }
+            return true;
         }
 
         // BuildingManager 클래스 구현
-        void BuildingManager::add_building(std::unique_ptr<Building> building) {
-            buildings.push_back(std::move(building));
+
+        void BuildingManager::addBuilding(std::unique_ptr<Building> building) {
+            buildings_.push_back(std::move(building));
         }
 
-        BuildingManager::Building* BuildingManager::get_building_at(const types::Position& pos) {
-            for (auto& building : buildings) {
-                if (building->contains(pos)) {
+        BuildingManager::Building* BuildingManager::getBuildingAt(const types::Position& position) {
+            for (auto& building : buildings_) {
+                if (building->contains(position)) {
                     return building.get();
                 }
             }
             return nullptr;
         }
 
-        const BuildingManager::Building* BuildingManager::get_building_at(const types::Position& pos) const {
-            for (const auto& building : buildings) {
-                if (building->contains(pos)) {
+        const BuildingManager::Building* BuildingManager::getBuildingAt(const types::Position& position) const {
+            for (const auto& building : buildings_) {
+                if (building->contains(position)) {
                     return building.get();
                 }
             }
             return nullptr;
         }
 
-        void BuildingManager::remove_building(Building* building) {
-            buildings.erase(
-                std::remove_if(buildings.begin(), buildings.end(),
+        void BuildingManager::removeBuilding(Building* building) {
+            buildings_.erase(
+                std::remove_if(buildings_.begin(), buildings_.end(),
                     [building](const std::unique_ptr<Building>& b) {
                         return b.get() == building;
                     }),
-                buildings.end()
+                buildings_.end()
             );
         }
 
-        const std::vector<std::unique_ptr<BuildingManager::Building>>& BuildingManager::get_buildings() const {
-            return buildings;
+        const std::vector<std::unique_ptr<BuildingManager::Building>>& BuildingManager::getBuildings() const {
+            return buildings_;
         }
 
-        void BuildingManager::remove_destroyed_buildings() {
-            buildings.erase(
-                std::remove_if(buildings.begin(), buildings.end(),
+        void BuildingManager::removeDestroyedBuildings() {
+            buildings_.erase(
+                std::remove_if(buildings_.begin(), buildings_.end(),
                     [](const std::unique_ptr<Building>& building) {
-                        return building->is_destroyed();
+                        return building->isDestroyed();
                     }),
-                buildings.end()
+                buildings_.end()
             );
         }
 

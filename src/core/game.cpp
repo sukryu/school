@@ -15,7 +15,7 @@ namespace dune {
             , cursor({ 1, 1 })
             , resource{ 100, 1000, 10, 100 }
             , display(constants::MAP_WIDTH, constants::MAP_HEIGHT, constants::DEFAULT_STATUS_WIDTH)
-            , map(constants::MAP_WIDTH, constants::MAP_HEIGHT, &display.get_message_window())
+            , map(constants::MAP_WIDTH, constants::MAP_HEIGHT, &display.getMessageWindow())
         {
             init();
         }
@@ -24,21 +24,21 @@ namespace dune {
         * PDF 1. 준비
         */
         void Game::init() {
-            init_resources();
-            init_terrain();
-            init_buildings();
-            init_sandworms();
-            init_harvesters();
+            initResources();
+            initTerrain();
+            initBuildings();
+            initSandworms();
+            initHarvesters();
             //init_air_units();
-            init_display();
+            initDisplay();
 
-            display.add_system_message(L"Game initialization complete");
+            display.addSystemMessage(L"Game initialization complete");
         }
 
         /**
         * PDF 1. 준비
         */
-        void Game::init_resources() {
+        void Game::initResources() {
             resource = types::Resource{
                 100,    // spice
                 1000,   // spice_max
@@ -50,14 +50,14 @@ namespace dune {
         /**
         * PDF 1. 준비
         */
-        void Game::init_terrain() {
+        void Game::initTerrain() {
             // 바위(Rock) 배치
             const std::vector<types::Position> rock_positions = {
                 {5, 20}, {8, 30}, {12, 40}, {3, 50}, {15, 45}
             };
 
             for (const auto& pos : rock_positions) {
-                map.set_terrain(pos, types::TerrainType::Rock);
+                map.setTerrain(pos, types::TerrainType::Rock);
             }
 
             // 스파이스 매장지 배치
@@ -66,7 +66,7 @@ namespace dune {
             };
 
             for (const auto& pos : spice_positions) {
-                map.set_terrain(pos, types::TerrainType::Spice);
+                map.setTerrain(pos, types::TerrainType::Spice);
             }
 
             // 장판(Plate) 배치
@@ -75,16 +75,16 @@ namespace dune {
             };
 
             for (const auto& pos : plate_positions) {
-                map.set_terrain(pos, types::TerrainType::Plate);
+                map.setTerrain(pos, types::TerrainType::Plate);
             }
         }
 
         /**
         * PDF 1. 준비
         */
-        void Game::init_buildings() {
+        void Game::initBuildings() {
             // Base(B)와 Plate(P) - 좌하단
-            map.add_building(std::make_unique<managers::BuildingManager::Building>(
+            map.addBuilding(std::make_unique<managers::BuildingManager::Building>(
                 types::Camp::ArtLadies,
                 std::wstring(L"Base"),
                 std::wstring(L"본진"),
@@ -95,7 +95,7 @@ namespace dune {
             ));
 
             // Base(B)와 Plate(P) - 우상단
-            map.add_building(std::make_unique<managers::BuildingManager::Building>(
+            map.addBuilding(std::make_unique<managers::BuildingManager::Building>(
                 types::Camp::Harkonnen,
                 std::wstring(L"Base"),
                 std::wstring(L"적진"),
@@ -109,13 +109,13 @@ namespace dune {
         /**
         * PDF 3. 샌드웜
         */
-        void Game::init_sandworms() {
-            map.add_unit(std::make_unique<managers::UnitManager::Unit>(
+        void Game::initSandworms() {
+            map.addUnit(std::make_unique<managers::Unit>(
                 types::UnitType::Sandworm,
                 types::Position{ constants::MAP_HEIGHT - 6, 5 }  // 좌하단 기지 근처
             ));
 
-            map.add_unit(std::make_unique<managers::UnitManager::Unit>(
+            map.addUnit(std::make_unique<managers::Unit>(
                 types::UnitType::Sandworm,
                 types::Position{ 5, constants::MAP_WIDTH - 6 }  // 우상단 기지 근처
             ));
@@ -124,9 +124,9 @@ namespace dune {
         /**
         * PDF 1. 준비
         */
-        void Game::init_harvesters() {
+        void Game::initHarvesters() {
             // 좌하단 하베스터 (아트레이디스 진영)
-            map.add_unit(std::make_unique<managers::UnitManager::Unit>(
+            map.addUnit(std::make_unique<managers::Unit>(
                 types::UnitType::Harvester,
                 5,      // build_cost
                 5,      // population
@@ -139,7 +139,7 @@ namespace dune {
             ));
 
             // 우상단 하베스터 (하코넨 진영)
-            map.add_unit(std::make_unique<managers::UnitManager::Unit>(
+            map.addUnit(std::make_unique<managers::Unit>(
                 types::UnitType::Harvester,
                 5,      // build_cost
                 5,      // population
@@ -155,33 +155,33 @@ namespace dune {
         /**
         * PDF 1. 준비
         */
-        void Game::init_display() {
-            display.add_system_message(L"Welcome to Dune 1.5");
-            display.add_system_message(L"Starting Game!");
-            display.update_commands({ L"Arrow keys: Move", L"Space: Select", L"Q: Exit" });
+        void Game::initDisplay() {
+            display.addSystemMessage(L"Welcome to Dune 1.5");
+            display.addSystemMessage(L"Starting Game!");
+            display.updateCommands({ L"Arrow keys: Move", L"Space: Select", L"Q: Exit" });
         }
 
         /**
         * PDF 1. 준비
         */
         void Game::intro() {
-            IO::clear_screen();
-            IO::set_color(constants::color::DEFAULT);
+            IO::clearScreen();
+            IO::setColor(constants::color::DEFAULT);
 
             std::wcout << L"\n\n\n";
             std::wcout << L"        DUNE 1.5\n";
             std::wcout << L"\n        Loading...\n";
 
             std::this_thread::sleep_for(std::chrono::seconds(2));
-            IO::clear_screen();
+            IO::clearScreen();
         }
 
         /**
         * PDF 1. 준비
         */
         void Game::outro() {
-            IO::clear_screen();
-            IO::set_color(constants::color::DEFAULT);
+            IO::clearScreen();
+            IO::setColor(constants::color::DEFAULT);
 
             std::wcout << L"\n\n\n";
             std::wcout << L"        게임을 종료합니다...\n";
@@ -196,8 +196,8 @@ namespace dune {
             game_state = types::GameState::Running;
 
             while (game_state == types::GameState::Running) {
-                process_input();
-                update_game_state();
+                processInput();
+                updateGameState();
                 render();
 
                 std::this_thread::sleep_for(std::chrono::milliseconds(constants::TICK));
@@ -205,13 +205,13 @@ namespace dune {
             }
         }
 
-        void Game::process_input() {
-            types::Key key = IO::get_key();
+        void Game::processInput() {
+            types::Key key = IO::getKey();
 
-            if (current_selection.type == types::SelectionType::Building) {
-                if (auto* building = current_selection.get_selected((Building*)nullptr)) {
-                    if (building->get_name() == L"Base" && key == types::Key::Build_Harvester) {
-                        handle_build_harvester(building);
+            if (current_selection.type_ == types::SelectionType::Building) {
+                if (auto* building = current_selection.getSelected((Building*)nullptr)) {
+                    if (building->getName() == L"Base" && key == types::Key::Build_Harvester) {
+                        handleBuildHarvester(building);
                         return;
                     }
                 }
@@ -222,35 +222,35 @@ namespace dune {
                 outro();
             }
             else if (key == types::Key::Space) {
-                handle_selection();
+                handleSelection();
             }
             else if (key == types::Key::Esc) {
-                handle_escape();
+                handleEscape();
             }
             else if (key == types::Key::Build_Plate) {
-                handle_build_plate();
+                handleBuildPlate();
             }
             else if (utils::is_arrow_key(key)) {
-                handle_movement(key);
+                handleMovement(key);
             }
         }
 
-        void Game::update_game_state() {
+        void Game::updateGameState() {
             map.update(sys_clock);
-            map.remove_destroyed_buildings();
-            update_selection_display();
+            map.removeDestroyedBuildings();
+            updateSelectionDisplay();
         }
 
         void Game::render() {
             display.update(resource, map, cursor);
         }
 
-        void Game::handle_movement(types::Key key) {
+        void Game::handleMovement(types::Key key) {
             types::Direction dir = utils::key_to_direction(key);
-            int move_amount = IO::is_double_click() ? 10 : 1;
+            int move_amount = IO::isDoubleClick() ? 10 : 1;
 
             for (int i = 0; i < move_amount; i++) {
-                types::Position new_pos = utils::move(cursor.get_current_position(), dir);
+                types::Position new_pos = utils::move(cursor.getCurrentPosition(), dir);
                 if (new_pos.row >= 0 && new_pos.row < constants::MAP_HEIGHT - 2 &&
                     new_pos.column >= 0 && new_pos.column < constants::MAP_WIDTH - 2) {
                     cursor.move(dir);
@@ -261,8 +261,8 @@ namespace dune {
             }
         }
 
-        void Game::handle_build_plate() {
-            types::Position pos = cursor.get_current_position();
+        void Game::handleBuildPlate() {
+            types::Position pos = cursor.getCurrentPosition();
             
             // 2x2 크기의 장판 생성
             auto plate = std::make_unique<managers::BuildingManager::Building>(
@@ -277,70 +277,70 @@ namespace dune {
             );
 
             // 설치 가능 여부 확인
-            if (plate->is_placeable(pos, map.get_terrain_manager())) {
-                map.add_building(std::move(plate));
-                display.add_system_message(L"The board has been installed.");
+            if (plate->isPlaceable(pos, map.getTerrainManager())) {
+                map.addBuilding(std::move(plate));
+                display.addSystemMessage(L"The board has been installed.");
             } else {
-                display.add_system_message(L"The board cannot be installed in this location.");
+                display.addSystemMessage(L"The board cannot be installed in this location.");
             }
         }
 
-        types::Position Game::find_empty_space_near_building(const Building* building) {
+        types::Position Game::findEmptySpaceNearBuilding(const Building* building) {
             const std::array<types::Position, 8> directions = { {
                 {-1, 0}, {1, 0}, {0, -1}, {0, 1},  // 상하좌우
                 {-1, -1}, {-1, 1}, {1, -1}, {1, 1}  // 대각선
             } };
 
-            types::Position base_pos = building->get_position();
+            types::Position base_pos = building->getPosition();
             for (const auto& dir : directions) {
                 types::Position check_pos{
                     base_pos.row + dir.row,
                     base_pos.column + dir.column
                 };
 
-                if (!map.get_entity_at<Unit>(check_pos) &&
-                    !map.get_entity_at<Building>(check_pos) &&
-                    map.get_terrain_manager().get_terrain(check_pos).is_walkable()) {
+                if (!map.getEntityAt<Unit>(check_pos) &&
+                    !map.getEntityAt<Building>(check_pos) &&
+                    map.getTerrainManager().getTerrain(check_pos).isWalkable()) {
                     return check_pos;
                 }
             }
             return { -1, -1 };  // 유효하지 않은 위치
         }
 
-        void Game::handle_build_harvester(const Building* building) {
+        void Game::handleBuildHarvester(const Building* building) {
             // 자원 체크
             if (resource.spice < 5) {
-                display.add_system_message(L"Not enough spice");
+                display.addSystemMessage(L"Not enough spice");
                 return;
             }
             if (resource.population + 5 > resource.population_max) {
-                display.add_system_message(L"Not enough population capacity");
+                display.addSystemMessage(L"Not enough population capacity");
                 return;
             }
 
             // 커서 위치 가져오기
-            types::Position cursor_pos = cursor.get_current_position();
-            types::Position base_pos = building->get_position();
+            types::Position cursor_pos = cursor.getCurrentPosition();
+            types::Position base_pos = building->getPosition();
 
             // 본진과 커서 사이의 거리 계산
-            int distance = utils::manhattan_distance(cursor_pos, base_pos);
+            int distance = utils::manhattanDistance(cursor_pos, base_pos);
 
             // 거리가 10 이상이면 설치 불가
             if (distance > 10) {
-                display.add_system_message(L"Too far from the base");
+                display.addSystemMessage(L"Too far from the base");
                 return;
             }
 
             // 설치 위치 유효성 검사
-            if (!map.get_terrain_manager().get_terrain(cursor_pos).is_walkable() ||
-                map.get_entity_at<Unit>(cursor_pos) ||
-                map.get_entity_at<Building>(cursor_pos)) {
-                display.add_system_message(L"Cannot place harvester here");
+            if (!map.getTerrainManager().getTerrain(cursor_pos).isWalkable() ||
+                map.getEntityAt<Unit>(cursor_pos) ||
+                map.getEntityAt<Building>(cursor_pos)) {
+                display.addSystemMessage(L"Cannot place harvester here");
                 return;
             }
 
             // 하베스터 생성
-            map.add_unit(std::make_unique<managers::UnitManager::Unit>(
+            map.addUnit(std::make_unique<managers::Unit>(
                 types::UnitType::Harvester,
                 5,      // build_cost
                 5,      // population
@@ -349,61 +349,61 @@ namespace dune {
                 70,     // health
                 0,      // sight_range
                 cursor_pos,
-                building->get_type() == types::Camp::ArtLadies ?
+                building->getType() == types::Camp::ArtLadies ?
                 types::Camp::ArtLadies : types::Camp::Harkonnen
             ));
 
             // 자원 소비
             resource.spice -= 5;
             resource.population += 5;
-            display.add_system_message(L"A new harvester ready");
+            display.addSystemMessage(L"A new harvester ready");
         }
 
-        void Game::handle_selection() {
-            types::Position pos = cursor.get_current_position();
-            current_selection.position = pos;
+        void Game::handleSelection() {
+            types::Position pos = cursor.getCurrentPosition();
+            current_selection.position_ = pos;
 
-            auto key = IO::get_key();
+            auto key = IO::getKey();
             if (key == types::Key::Build_Plate) {
-                handle_build_plate();
+                handleBuildPlate();
                 return;
             }
 
-            if (const Unit* unit = map.get_entity_at<Unit>(pos)) {
-                current_selection.type = types::SelectionType::Unit;
-                current_selection.selected_ptr = const_cast<Unit*>(unit);
+            if (const Unit* unit = map.getEntityAt<Unit>(pos)) {
+                current_selection.type_ = types::SelectionType::Unit;
+                current_selection.selectedPtr_ = const_cast<core::Selection::Unit*>(unit);
             }
-            else if (const Building* building = map.get_entity_at<Building>(pos)) {
-                current_selection.type = types::SelectionType::Building;
-                current_selection.selected_ptr = const_cast<Building*>(building);
+            else if (const Building* building = map.getEntityAt<Building>(pos)) {
+                current_selection.type_ = types::SelectionType::Building;
+                current_selection.selectedPtr_ = const_cast<Building*>(building);
             }
             else {
-                current_selection.type = types::SelectionType::Terrain;
-                current_selection.selected_ptr = &map.get_terrain_manager().get_terrain(pos);
+                current_selection.type_ = types::SelectionType::Terrain;
+                current_selection.selectedPtr_ = &map.getTerrainManager().getTerrain(pos);
             }
         }
 
-        void Game::handle_escape() {
+        void Game::handleEscape() {
             current_selection.clear();
-            display.update_status(L"No Selection");
-            display.update_commands({ L"B: Build", L"T: Train", L"Q: Quit" });
+            display.updateStatus(L"No Selection");
+            display.updateCommands({ L"B: Build", L"T: Train", L"Q: Quit" });
         }
 
-        void Game::update_selection_display() {
+        void Game::updateSelectionDisplay() {
             std::wstring status_text;
             std::vector<std::wstring> command_text;
 
-            switch (current_selection.type) {
+            switch (current_selection.type_) {
             case types::SelectionType::Unit:
-                if (auto* unit = current_selection.get_selected((Unit*)nullptr)) {
-                    status_text = L"Selected Unit: " + std::wstring(1, unit->get_representation());
+                if (auto* unit = current_selection.getSelected<core::Selection::Unit>()) {
+                    status_text = L"Selected Unit: " + std::wstring(1, unit->getRepresentation());
                     command_text = { L"M: Move", L"A: Attack", L"S: Stop" };
                 }
                 break;
             case types::SelectionType::Building:
-                if (auto* building = current_selection.get_selected((Building*)nullptr)) {
-                    status_text = L"Selected Building: " + building->get_name();
-                    if (building->get_name() == L"Base") {
+                if (auto* building = current_selection.getSelected((Building*)nullptr)) {
+                    status_text = L"Selected Building: " + building->getName();
+                    if (building->getName() == L"Base") {
                         command_text = { L"H: Build Harvester", L"ESC: Cancel" };
                     }
                     else {
@@ -412,8 +412,8 @@ namespace dune {
                 }
                 break;
             case types::SelectionType::Terrain:
-                if (auto* terrain = current_selection.get_selected((Terrain*)nullptr)) {
-                    switch (terrain->get_type()) {
+                if (auto* terrain = current_selection.getSelected<core::Selection::Terrain>()) {
+                    switch (terrain->getType()) {
                     case types::TerrainType::Desert:
                         status_text = L"Selected Terrain: Desert";
                         break;
@@ -430,7 +430,7 @@ namespace dune {
                         status_text = L"Selected Terrain: Unknown";
                     }
 
-                    if (terrain->can_harvest_spice()) {
+                    if (terrain->canHarvestSpice()) {
                         command_text = { L"H: Harvest Spice" };
                     }
                     else {
@@ -444,8 +444,8 @@ namespace dune {
                 break;
             }
 
-            display.update_status(status_text);
-            display.update_commands(command_text);
+            display.updateStatus(status_text);
+            display.updateCommands(command_text);
         }
     } // namespace core
 } // namespace dune

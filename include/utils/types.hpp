@@ -5,7 +5,9 @@
 
 namespace dune {
 	namespace types {
-		/// 기본 구조체
+        /**
+         * @brief 맵 상의 위치를 나타내는 구조체입니다.
+         */
         struct Position {
             int row, column;
 
@@ -31,6 +33,9 @@ namespace dune {
             }
         };
 
+        /**
+         * @brief 자원 정보를 담는 구조체입니다.
+         */
         struct Resource {
             int spice;
             int spice_max;
@@ -41,7 +46,9 @@ namespace dune {
                 : spice(s), spice_max(sm), population(p), population_max(pm) {}
         };
 
-        // 게임 관련 열거형
+        /**
+         * @brief 방향을 나타내는 열거형입니다.
+         */
         enum class Direction {
             Stay = 0,
             Up,
@@ -50,6 +57,9 @@ namespace dune {
             Down
         };
 
+        /**
+         * @brief 사용자 입력 키를 나타내는 열거형입니다.
+         */
         enum class Key {
             None = 0,
             Up,
@@ -71,6 +81,9 @@ namespace dune {
             Undefined
         };
 
+        /**
+         * @brief 선택된 객체의 타입을 나타내는 열거형입니다.
+         */
         enum class SelectionType {
             None,
             Terrain,
@@ -78,12 +91,18 @@ namespace dune {
             Unit
         };
 
+        /**
+         * @brief 진영을 나타내는 열거형입니다.
+         */
         enum class Camp {
             Common = 1,
             ArtLadies,
             Harkonnen
         };
 
+        /**
+         * @brief 유닛의 종류를 나타내는 열거형입니다.
+         */
         enum class UnitType {
             None,
             Harvester,
@@ -96,6 +115,9 @@ namespace dune {
             Sandstorm
         };
 
+        /**
+         * @brief 지형의 종류를 나타내는 열거형입니다.
+         */
         enum class TerrainType {
             Desert,
             Plate,
@@ -104,6 +126,9 @@ namespace dune {
             Empty
         };
 
+        /**
+         * @brief 건물의 종류를 나타내는 열거형입니다.
+         */
         enum class BuildingType {
             None,
             Base,

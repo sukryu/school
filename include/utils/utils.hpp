@@ -32,14 +32,21 @@ namespace dune {
             }
         }
 
-        constexpr types::Position move(const types::Position& p, types::Direction d) {
-            return p + direction_to_position(d);
-        }
+        /**
+         * @brief 주어진 방향으로 위치를 이동시킵니다.
+         * @param position 현재 위치.
+         * @param direction 이동할 방향.
+         * @return types::Position 이동한 후의 위치.
+         */
+        types::Position move(const types::Position& position, types::Direction direction);
 
-        // 거리 계산
-        inline int manhattan_distance(const types::Position& p1, const types::Position& p2) {
-            return std::abs(p1.row - p2.row) + std::abs(p1.column - p2.column);
-        }
+        /**
+         * @brief 두 위치 간의 맨해튼 거리를 계산합니다.
+         * @param a 위치 A.
+         * @param b 위치 B.
+         * @return int 맨해튼 거리.
+         */
+        int manhattanDistance(const types::Position& a, const types::Position& b);
 
         // 난수 생성
         inline int random_int(int min, int max) {

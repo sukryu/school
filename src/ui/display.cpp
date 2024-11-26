@@ -1,50 +1,50 @@
-#include "../include/ui/display.hpp"
+#include "display.hpp"
 
 namespace dune {
     namespace ui {
 
-        Display::Display(int map_width, int map_height, int status_width)
-            : renderer(map_width + status_width,
-                constants::RESOURCE_HEIGHT + map_height + constants::SYSTEM_MESSAGE_HEIGHT)
-            , resource_bar(map_width + status_width)
-            , message_window(0, constants::RESOURCE_HEIGHT + map_height, map_width, constants::SYSTEM_MESSAGE_HEIGHT)
-            , command_window(map_width, constants::RESOURCE_HEIGHT + map_height, status_width, constants::SYSTEM_MESSAGE_HEIGHT)
-            , status_window(map_width, constants::RESOURCE_HEIGHT, status_width, map_height)
-            , map_renderer(0, constants::RESOURCE_HEIGHT, map_width, map_height)
-            , total_width(map_width + status_width)
-            , total_height(constants::RESOURCE_HEIGHT + map_height + constants::SYSTEM_MESSAGE_HEIGHT) {}
+        Display::Display(int mapWidth, int mapHeight, int statusWidth)
+            : renderer_(mapWidth + statusWidth,
+                constants::RESOURCE_HEIGHT + mapHeight + constants::SYSTEM_MESSAGE_HEIGHT)
+            , resourceBar_(mapWidth + statusWidth)
+            , messageWindow_(0, constants::RESOURCE_HEIGHT + mapHeight, mapWidth, constants::SYSTEM_MESSAGE_HEIGHT)
+            , commandWindow_(mapWidth, constants::RESOURCE_HEIGHT + mapHeight, statusWidth, constants::SYSTEM_MESSAGE_HEIGHT)
+            , statusWindow_(mapWidth, constants::RESOURCE_HEIGHT, statusWidth, mapHeight)
+            , mapRenderer_(0, constants::RESOURCE_HEIGHT, mapWidth, mapHeight)
+            , totalWidth_(mapWidth + statusWidth)
+            , totalHeight_(constants::RESOURCE_HEIGHT + mapHeight + constants::SYSTEM_MESSAGE_HEIGHT) {}
 
         void Display::update(const types::Resource& resource, const core::Map& map, const Cursor& cursor) {
-            renderer.clear();
+            renderer_.clear();
 
-            resource_bar.update(resource);
-            resource_bar.draw(renderer);
+            resourceBar_.update(resource);
+            resourceBar_.draw(renderer_);
 
-            map_renderer.draw(renderer, map);
+            mapRenderer_.draw(renderer_, map);
 
-            status_window.draw(renderer);
-            command_window.draw(renderer);
-            message_window.draw(renderer);
+            statusWindow_.draw(renderer_);
+            commandWindow_.draw(renderer_);
+            messageWindow_.draw(renderer_);
 
-            cursor.draw(renderer, map);
+            cursor.draw(renderer_, map);
 
-            renderer.render();
+            renderer_.render();
         }
 
-        void Display::add_system_message(const std::wstring& message) {
-            message_window.add_message(message);
+        void Display::addSystemMessage(const std::wstring& message) {
+            messageWindow_.addMessage(message);
         }
 
-        void Display::update_status(const std::wstring& status) {
-            status_window.update_status(status);
+        void Display::updateStatus(const std::wstring& status) {
+            statusWindow_.updateStatus(status);
         }
 
-        void Display::update_commands(const std::vector<std::wstring>& commands) {
-            command_window.update_commands(commands);
+        void Display::updateCommands(const std::vector<std::wstring>& commands) {
+            commandWindow_.updateCommands(commands);
         }
 
-        void Display::clear_screen() {
-            renderer.clear();
+        void Display::clearScreen() {
+            renderer_.clear();
         }
     } // namespace ui
 } // namespace dune

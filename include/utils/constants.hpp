@@ -6,12 +6,19 @@ namespace dune {
         constexpr int TICK = 10;  // ms
         constexpr int DOUBLE_CLICK_INTERVAL = 100; // ms
 
-        // 맵 관련
+        /**
+         * @brief 맵의 건물과 유닛을 구분하는 레이어입니다.
+         */
         constexpr int N_LAYER = 2;
+        /**
+         * @brief 맵의 기본 너비와 높이입니다.
+         */
         constexpr int MAP_WIDTH = 60;
         constexpr int MAP_HEIGHT = 18;
 
-        // UI 관련
+        /**
+         * @brief UI 구성 요소의 크기 설정입니다.
+         */
         constexpr int RESOURCE_HEIGHT = 1;
         constexpr int SYSTEM_MESSAGE_HEIGHT = 10;
         constexpr int DEFAULT_STATUS_WIDTH = 30;
@@ -23,7 +30,14 @@ namespace dune {
         constexpr int SANDWORM_SPEED = 10000;
         constexpr int HARVESTER_SPEED = 2000;
 
-        // 색상 관련
+        /**
+         * @brief 샌드웜의 이동 속도 (밀리초).
+         */
+        constexpr int SANDWORM_SPEED = 10000; // milliseconds
+
+        /**
+         * @brief 콘솔 색상 코드를 정의하는 네임스페이스입니다.
+         */
         namespace color {
             constexpr int DEFAULT = 7;        // White (흰색 글자)
             constexpr int CURSOR = 112;       // 커서 (흰색 배경에 검은 글자)
