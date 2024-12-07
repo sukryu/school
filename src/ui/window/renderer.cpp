@@ -1,6 +1,6 @@
-#include "renderer.hpp"
-#include "../core/io.hpp"
-#include "../utils/constants.hpp"
+#include "ui/renderer.hpp"
+#include "core/io.hpp"
+#include "utils/constants.hpp"
 #include <algorithm>
 
 namespace dune {

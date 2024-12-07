@@ -1,4 +1,4 @@
-#include "resource_bar.hpp"
+#include "ui/window/resource_bar.hpp"
 
 namespace dune {
     namespace ui {

@@ -16,9 +16,9 @@ namespace dune {
          */
         class Map {
         public:
-            using Unit = managers::Unit;
+            using Unit = managers::UnitManager::Unit;
             using Building = managers::BuildingManager::Building;
-            using Terrain = managers::Terrain;
+            using Terrain = managers::TerrainManager::Terrain;
 
             /**
              * @brief Map 클래스의 생성자입니다.

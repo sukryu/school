@@ -1,5 +1,5 @@
-#include "base_window.hpp"
-#include "../../utils/constants.hpp"
+#include "ui/window/base_window.hpp"
+#include "utils/constants.hpp"
 
 namespace dune {
     namespace ui {

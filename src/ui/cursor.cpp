@@ -1,5 +1,5 @@
-#include "cursor.hpp"
-#include "../utils/utils.hpp"
+#include "ui/cursor.hpp"
+#include "utils/utils.hpp"
 
 namespace dune {
     namespace ui {

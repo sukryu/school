@@ -13,7 +13,7 @@ namespace dune {
          */
         class Cursor {
         public:
-            using Unit = managers::Unit;
+            using Unit = managers::UnitManager::Unit;
             using Building = managers::BuildingManager::Building;
 
             /**

@@ -1,4 +1,4 @@
-#include "map_renderer.hpp"
+#include "ui/window/map_renderer.hpp"
 
 namespace dune {
     namespace ui {
@@ -48,16 +48,17 @@ namespace dune {
         }
 
         void MapRenderer::drawGroundUnits(Renderer& renderer, const core::Map& map) {
-            for (const auto& unit : map.getUnitManager().getUnits()) {
-                if (unit->getType() != types::UnitType::DesertEagle) {
-                    types::Position pos = unit->getPosition();
+            for (const auto& entry : map.getUnitManager().getUnits()) {
+                const auto& unitPtr = entry.second;
+                if (unitPtr->getType() != types::UnitType::DesertEagle) {
+                    types::Position pos = unitPtr->getPosition();
                     int drawX = x_ + pos.column + 1;
                     int drawY = y_ + pos.row + 1;
                     if (drawX >= x_ + 1 && drawX < x_ + width_ - 1 &&
                         drawY >= y_ + 1 && drawY < y_ + height_ - 1) {
                         renderer.drawChar(drawX, drawY,
-                            unit->getRepresentation(),
-                            unit->getColor());
+                            unitPtr->getRepresentation(),
+                            unitPtr->getColor());
                     }
                 }
             }

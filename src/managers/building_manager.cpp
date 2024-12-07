@@ -1,7 +1,7 @@
-#include "building_manager.hpp"
-#include "terrain_manager.hpp"
-#include "../utils/constants.hpp"
-#include "../utils/utils.hpp"
+#include "managers/building_manager.hpp"
+#include "managers/terrain_manager.hpp"
+#include "utils/constants.hpp"
+#include "utils/utils.hpp"
 #include <iostream>
 
 namespace dune {

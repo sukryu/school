@@ -1,5 +1,5 @@
-#include "message_window.hpp"
-#include "../../utils/constants.hpp"
+#include "ui/window/message_window.hpp"
+#include "utils/constants.hpp"
 #include <locale>
 #include <codecvt>
 

@@ -1,4 +1,4 @@
-#include "display.hpp"
+#include "ui/display.hpp"
 
 namespace dune {
     namespace ui {

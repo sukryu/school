@@ -1,4 +1,4 @@
-#include "status_window.hpp"
+#include "ui/window/status_window.hpp"
 
 namespace dune {
     namespace ui {

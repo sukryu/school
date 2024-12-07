@@ -1,6 +1,6 @@
-#include "map.hpp"
-#include "../ui/window/message_window.hpp"
-#include "../utils/utils.hpp"
+#include "core/map.hpp"
+#include "ui/window/message_window.hpp"
+#include "utils/utils.hpp"
 #include <limits>
 
 namespace dune {
@@ -16,15 +16,19 @@ namespace dune {
 
         void Map::update(std::chrono::milliseconds currentTime) {
             // 각 유닛을 업데이트합니다.
-            for (const auto& unit : unitManager_.getUnits()) {
-                switch (unit->getType()) {
-                case types::UnitType::Sandworm:
-                    updateSandworm(unit.get(), currentTime);
-                    break;
-                // 다른 유닛 타입의 업데이트 로직을 추가합니다.
-                default:
-                    // 일반 유닛의 기본 동작 (이동, 전투 등)
-                    break;
+           for (const auto& entry : unitManager_.getUnits()) {
+                // entry는 pair<const types::Position, std::unique_ptr<Unit>> 이므로
+                // 실제 유닛 객체는 entry.second-> 를 통해 접근해야 합니다.
+                const auto& unitPtr = entry.second; // std::unique_ptr<Unit>에 대한 참조
+                // unitPtr는 unique_ptr<Unit>이므로 unitPtr->getType() 형태로 호출 가능
+                switch (unitPtr->getType()) {
+                    case types::UnitType::Sandworm:
+                        // updateSandworm는 Unit*를 필요로 하므로 unitPtr.get()으로 raw pointer 획득
+                        updateSandworm(unitPtr.get(), currentTime);
+                        break;
+                    default:
+                        // 일반 유닛 처리 로직
+                        break;
                 }
             }
         }
@@ -45,18 +49,21 @@ namespace dune {
             types::Position nearestPosition = fromPosition;
             int minDistance = std::numeric_limits<int>::max();
 
-            for (const auto& unit : unitManager_.getUnits()) {
-                // 제외할 타입의 유닛은 건너뜁니다.
-                if (unit->getType() == excludeType) {
+            for (const auto& entry : unitManager_.getUnits()) {
+                const auto& unitPtr = entry.second; // std::unique_ptr<Unit>&
+
+                // 유닛 타입 비교
+                if (unitPtr->getType() == excludeType) {
                     continue;
                 }
 
-                // 잡아먹을 수 없는 유닛은 제외
-                if (!isValidSandwormTarget(unit.get())) {
+                // 샌드웜 타겟 확인 시 raw pointer 필요
+                if (!isValidSandwormTarget(unitPtr.get())) {
                     continue;
                 }
 
-                types::Position unitPosition = unit->getPosition();
+                // 유닛 위치 가져오기
+                types::Position unitPosition = unitPtr->getPosition();
                 int distance = utils::manhattanDistance(unitPosition, fromPosition);
 
                 if (distance < minDistance) {
@@ -64,7 +71,6 @@ namespace dune {
                     nearestPosition = unitPosition;
                 }
             }
-
             return nearestPosition;
         }
 

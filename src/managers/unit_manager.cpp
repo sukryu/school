@@ -1,6 +1,6 @@
-#include "unit_manager.hpp"
-#include "../utils/utils.hpp"
-#include "../utils/constants.hpp"
+#include "managers/unit_manager.hpp"
+#include "utils/utils.hpp"
+#include "utils/constants.hpp"
 #include <iostream>
 
 namespace dune {
@@ -8,16 +8,10 @@ namespace dune {
 
         // Unit 클래스 구현
 
-        Unit::Unit(types::UnitType type, int buildCost, int population, int speed,
-                   int attackPower, int health, int sightRange, types::Position position,
-                   types::Camp camp)
-            : type_(type), buildCost_(buildCost), population_(population), speed_(speed),
-              attackPower_(attackPower), health_(health), sightRange_(sightRange),
-              position_(position), camp_(camp), lastMoveTime_(0) {
-            // 유닛 타입에 따른 초기화 로직이 필요하면 여기에 추가합니다.
-        }
+        UnitManager::Unit::Unit(types::UnitType type, int buildCost, int population, types::Position pos, int health, int speed, int attackPower, int sightRange, types::Camp camp)
+                    : type_(type), buildCost_(buildCost), population_(population), position_(pos), health_(health), speed_(speed), attackPower_(attackPower), sightRange_(sightRange), camp_(camp) {}
 
-        Unit::Unit(types::UnitType type, types::Position position)
+        UnitManager::Unit::Unit(types::UnitType type, types::Position position)
             : type_(type), position_(position), lastMoveTime_(0) {
             switch (type_) {
             case types::UnitType::Sandworm:
@@ -42,7 +36,7 @@ namespace dune {
             }
         }
 
-        wchar_t Unit::getRepresentation() const {
+        wchar_t UnitManager::Unit::getRepresentation() const {
             switch (type_) {
             case types::UnitType::Harvester:  return L'H';
             case types::UnitType::Fremen:     return L'M';
@@ -54,7 +48,7 @@ namespace dune {
             }
         }
 
-        int Unit::getColor() const {
+        int UnitManager::Unit::getColor() const {
             if (type_ == types::UnitType::Harvester) {
                 switch (camp_) {
                 case types::Camp::ArtLadies:  return constants::color::ART_LADIES;
@@ -72,7 +66,7 @@ namespace dune {
             }
         }
 
-        void Unit::printInfo() const {
+        void UnitManager::Unit::printInfo() const {
             std::wcout << L"Unit Type: " << static_cast<int>(type_)
                        << L", Cost: " << buildCost_
                        << L", Population: " << population_
@@ -83,73 +77,70 @@ namespace dune {
                        << L", Position: (" << position_.row << L", " << position_.column << L")\n";
         }
 
-        void Unit::move(types::Direction direction) {
+        void UnitManager::Unit::move(types::Direction direction) {
             position_ = utils::move(position_, direction);
         }
 
-        bool Unit::isReadyToMove(std::chrono::milliseconds currentTime) const {
+        bool UnitManager::Unit::isReadyToMove(std::chrono::milliseconds currentTime) const {
             return currentTime - lastMoveTime_ >= std::chrono::milliseconds(speed_);
         }
 
-        void Unit::updateLastMoveTime(std::chrono::milliseconds currentTime) {
+        void UnitManager::Unit::updateLastMoveTime(std::chrono::milliseconds currentTime) {
             lastMoveTime_ = currentTime;
         }
 
-        void Unit::consumeTarget() {
+        void UnitManager::Unit::consumeTarget() {
             length_ += 1;
         }
 
-        bool Unit::canExcrete() const {
+        bool UnitManager::Unit::canExcrete() const {
             return length_ > 1;
         }
 
-        void Unit::excrete() {
+        void UnitManager::Unit::excrete() {
             if (length_ > 1) {
                 length_ -= 1;
             }
         }
 
-        bool Unit::shouldExcrete() const {
+        bool UnitManager::Unit::shouldExcrete() const {
             return length_ > 1 && (rand() % 100 < 30);
         }
 
         // UnitManager 클래스 구현
 
         void UnitManager::addUnit(std::unique_ptr<Unit> unit) {
-            units_.push_back(std::move(unit));
+            types::Position pos = unit->getPosition();
+            unitsByPosition_[pos] = std::move(unit);
         }
 
-        Unit* UnitManager::getUnitAt(const types::Position& position) {
-            for (auto& unit : units_) {
-                if (unit->getPosition() == position) {
-                    return unit.get();
-                }
+        UnitManager::Unit* UnitManager::getUnitAt(const types::Position& position) {
+            auto it = unitsByPosition_.find(position);
+            if (it != unitsByPosition_.end()) {
+                return it->second.get();
             }
             return nullptr;
         }
 
-        const Unit* UnitManager::getUnitAt(const types::Position& position) const {
-            for (const auto& unit : units_) {
-                if (unit->getPosition() == position) {
-                    return unit.get();
-                }
+        const UnitManager::Unit* UnitManager::getUnitAt(const types::Position& position) const {
+            auto it = unitsByPosition_.find(position);
+            if (it != unitsByPosition_.end()) {
+                return it->second.get();
             }
             return nullptr;
         }
 
         void UnitManager::removeUnit(Unit* unit) {
-            units_.erase(
-                std::remove_if(units_.begin(), units_.end(),
-                    [unit](const std::unique_ptr<Unit>& u) {
-                        return u.get() == unit;
-                    }),
-                units_.end()
-            );
+            if (!unit) return;
+            // Unit의 위치를 얻어 key로 사용
+            types::Position pos = unit->getPosition();
+            unitsByPosition_.erase(pos);
         }
 
-        const std::vector<std::unique_ptr<Unit>>& UnitManager::getUnits() const {
-            return units_;
-        }
+        const dune::managers::UnitManager::UnitMap& 
+            dune::managers::UnitManager::getUnits() const {
+                return unitsByPosition_;
+            }
 
     } // namespace managers
 } // namespace dune

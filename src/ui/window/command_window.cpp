@@ -1,4 +1,4 @@
-#include "command_window.hpp"
+#include "ui/window/command_window.hpp"
 
 namespace dune {
     namespace ui {

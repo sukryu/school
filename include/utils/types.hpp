@@ -2,6 +2,7 @@
 #include "constants.hpp"
 #include <cstdint>
 #include <string>
+#include <functional>
 
 namespace dune {
 	namespace types {
@@ -10,14 +11,6 @@ namespace dune {
          */
         struct Position {
             int row, column;
-
-            constexpr Position operator+(const Position& other) const {
-                return { row + other.row, column + other.column };
-            }
-
-            constexpr Position operator-(const Position& other) const {
-                return { row - other.row, column - other.column };
-            }
 
             bool operator==(const Position& other) const {
                 return row == other.row && column == other.column;
@@ -150,3 +143,18 @@ namespace dune {
         };
 	} // namespace types
 } // namespace dune
+
+namespace std {
+    template<>
+    struct hash<dune::types::Position> {
+        size_t operator()(const dune::types::Position& position) const {
+            // 간단한 해시 함수: row와 column을 이용
+            // 해싱 전략은 다양하게 변경할 수 있습니다.
+            // XOR와 시프트 연산을 통해 간단한 해시를 만듭니다.
+            // 해시 충돌 최소화를 위해 더 복잡한 해싱을 사용할 수 있습니다.
+            size_t h1 = std::hash<int>()(position.row);
+            size_t h2 = std::hash<int>()(position.column);
+            return h1 ^ (h2 + 0x9e3779b97f4a7c16ULL + (h1 << 6) + (h1 >> 2));
+        }
+    };
+}

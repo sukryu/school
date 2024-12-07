@@ -31,11 +31,6 @@ namespace dune {
         constexpr int HARVESTER_SPEED = 2000;
 
         /**
-         * @brief 샌드웜의 이동 속도 (밀리초).
-         */
-        constexpr int SANDWORM_SPEED = 10000; // milliseconds
-
-        /**
          * @brief 콘솔 색상 코드를 정의하는 네임스페이스입니다.
          */
         namespace color {

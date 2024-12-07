@@ -110,12 +110,12 @@ namespace dune {
         * PDF 3. 샌드웜
         */
         void Game::initSandworms() {
-            map.addUnit(std::make_unique<managers::Unit>(
+            map.addUnit(std::make_unique<managers::UnitManager::Unit>(
                 types::UnitType::Sandworm,
                 types::Position{ constants::MAP_HEIGHT - 6, 5 }  // 좌하단 기지 근처
             ));
 
-            map.addUnit(std::make_unique<managers::Unit>(
+            map.addUnit(std::make_unique<managers::UnitManager::Unit>(
                 types::UnitType::Sandworm,
                 types::Position{ 5, constants::MAP_WIDTH - 6 }  // 우상단 기지 근처
             ));
@@ -126,29 +126,29 @@ namespace dune {
         */
         void Game::initHarvesters() {
             // 좌하단 하베스터 (아트레이디스 진영)
-            map.addUnit(std::make_unique<managers::Unit>(
+            map.addUnit(std::make_unique<managers::UnitManager::Unit>(
                 types::UnitType::Harvester,
-                5,      // build_cost
-                5,      // population
-                constants::HARVESTER_SPEED,   // speed
-                0,      // attack_power
-                70,     // health
-                0,      // sight_range
-                types::Position{ constants::MAP_HEIGHT - 5, 0 },    // 좌하단 Base 위치
-                types::Camp::ArtLadies  // 진영 추가
+                5, // buildCost
+                5, // population
+                types::Position{ constants::MAP_HEIGHT - 5, 0 }, // pos
+                70, // health
+                constants::HARVESTER_SPEED, // speed
+                0,  // attackPower
+                0,  // sightRange
+                types::Camp::ArtLadies
             ));
 
             // 우상단 하베스터 (하코넨 진영)
-            map.addUnit(std::make_unique<managers::Unit>(
+            map.addUnit(std::make_unique<managers::UnitManager::Unit>(
                 types::UnitType::Harvester,
-                5,      // build_cost
-                5,      // population
-                constants::HARVESTER_SPEED,   // speed
-                0,      // attack_power
-                70,     // health
-                0,      // sight_range
-                types::Position{ 2, constants::MAP_WIDTH - 3 },     // 우상단 Base 위치
-                types::Camp::Harkonnen  // 진영 추가
+                5, // buildCost
+                5, // population
+                types::Position{ 2, constants::MAP_WIDTH - 3 }, // pos
+                70, // health
+                constants::HARVESTER_SPEED, // speed
+                0, // attackPower
+                0, // sightRange
+                types::Camp::Harkonnen
             ));
         }
 
@@ -209,7 +209,7 @@ namespace dune {
             types::Key key = IO::getKey();
 
             if (current_selection.type_ == types::SelectionType::Building) {
-                if (auto* building = current_selection.getSelected((Building*)nullptr)) {
+                if (auto* building = current_selection.getSelected<Building>()) {
                     if (building->getName() == L"Base" && key == types::Key::Build_Harvester) {
                         handleBuildHarvester(building);
                         return;
@@ -340,15 +340,15 @@ namespace dune {
             }
 
             // 하베스터 생성
-            map.addUnit(std::make_unique<managers::Unit>(
+            map.addUnit(std::make_unique<managers::UnitManager::Unit>(
                 types::UnitType::Harvester,
                 5,      // build_cost
                 5,      // population
+                cursor_pos,
+                70,     // health
                 constants::HARVESTER_SPEED,
                 0,      // attack_power
-                70,     // health
                 0,      // sight_range
-                cursor_pos,
                 building->getType() == types::Camp::ArtLadies ?
                 types::Camp::ArtLadies : types::Camp::Harkonnen
             ));
@@ -371,15 +371,14 @@ namespace dune {
 
             if (const Unit* unit = map.getEntityAt<Unit>(pos)) {
                 current_selection.type_ = types::SelectionType::Unit;
-                current_selection.selectedPtr_ = const_cast<core::Selection::Unit*>(unit);
-            }
-            else if (const Building* building = map.getEntityAt<Building>(pos)) {
+                current_selection.selectedPtr_ = unit; // const Unit*
+            } else if (const Building* building = map.getEntityAt<Building>(pos)) {
                 current_selection.type_ = types::SelectionType::Building;
-                current_selection.selectedPtr_ = const_cast<Building*>(building);
-            }
-            else {
+                current_selection.selectedPtr_ = building; // const Building*
+            } else {
                 current_selection.type_ = types::SelectionType::Terrain;
-                current_selection.selectedPtr_ = &map.getTerrainManager().getTerrain(pos);
+                const Terrain& terrain = map.getTerrainManager().getTerrain(pos);
+                current_selection.selectedPtr_ = &terrain; // const Terrain*
             }
         }
 
@@ -401,7 +400,7 @@ namespace dune {
                 }
                 break;
             case types::SelectionType::Building:
-                if (auto* building = current_selection.getSelected((Building*)nullptr)) {
+                if (auto* building = current_selection.getSelected<Building>()) {
                     status_text = L"Selected Building: " + building->getName();
                     if (building->getName() == L"Base") {
                         command_text = { L"H: Build Harvester", L"ESC: Cancel" };
