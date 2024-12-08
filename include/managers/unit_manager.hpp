@@ -45,7 +45,7 @@ namespace dune {
              */
             const UnitMap& getUnits() const;
 
-            const dune::spatial::QuadTree& getQuadTree() { return quadTree_; }
+            const dune::spatial::QuadTree& getQuadTree() const { return quadTree_; }
 
         private:
             // 위치를 키로 하여 유닛을 관리합니다.

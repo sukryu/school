@@ -1,4 +1,5 @@
 #include "ui/window/map_renderer.hpp"
+#include <iostream>
 
 namespace dune {
     namespace ui {
@@ -22,12 +23,16 @@ namespace dune {
                 for (int col = 0; col < width_ - 2; ++col) {
                     types::Position pos{ row, col };
                     const auto& terrain = map.getTerrainManager().getTerrain(pos);
+
+                    // 디버깅: 출력할 문자와 색상 확인
                     wchar_t ch = terrain.getRepresentation();
                     int color = terrain.getColor();
+
                     renderer.drawChar(x_ + col + 1, y_ + row + 1, ch, color);
                 }
             }
         }
+
 
         void MapRenderer::drawBuildings(Renderer& renderer, const core::Map& map) {
             for (const auto& building : map.getBuildingManager().getBuildings()) {

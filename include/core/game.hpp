@@ -200,6 +200,8 @@ namespace dune {
 
             bool placeBuilding(std::unique_ptr<managers::BuildingManager::Building> building);
 
+            void showUnitList();
+
             // 게임 상태
             std::chrono::milliseconds sys_clock;
             types::GameState game_state;

@@ -1,5 +1,6 @@
 #include "entity/unit.hpp"
 #include "utils/utils.hpp"
+#include "entity/sandworm_ai.hpp"
 #include "utils/constants.hpp"
 #include <iostream>
 
@@ -23,6 +24,8 @@ namespace dune {
                 sightRange_ = 999;
                 length_ = 1;
                 camp_ = types::Camp::Common;
+
+                ai_ = std::make_unique<SandwormAI>();
                 break;
             default:
                 buildCost_ = 5;
@@ -47,6 +50,14 @@ namespace dune {
             default:                          return L'?';
             }
         }
+
+        std::wstring Unit::getInfo() const {
+            return L"Type: " + std::wstring(1, getRepresentation()) +
+                L", Position: (" + std::to_wstring(position_.row) + L", " +
+                std::to_wstring(position_.column) + L"), Health: " +
+                std::to_wstring(health_);
+        }
+
 
         int Unit::getColor() const {
             if (type_ == types::UnitType::Harvester) {

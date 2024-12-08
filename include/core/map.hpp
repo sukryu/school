@@ -65,6 +65,7 @@ namespace dune {
 
             // Manager 접근자
             const managers::TerrainManager& getTerrainManager() const { return terrainManager_; }
+            managers::TerrainManager& getTerrainManager() { return terrainManager_; }
             const managers::UnitManager& getUnitManager() const { return unitManager_; }
             managers::UnitManager& getUnitManager() { return unitManager_; }
             const managers::BuildingManager& getBuildingManager() const { return buildingManager_; }

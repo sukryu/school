@@ -32,6 +32,11 @@ namespace dune {
         }
 
         int QuadTree::getQuadrant(const entity::Unit* unit) const {
+            // unit 포인터의 유효성 검사
+            if (!unit) {
+                throw std::invalid_argument("Invalid unit pointer passed to QuadTree::getQuadrant.");
+            }
+
             types::Position pos = unit->getPosition();
             int mx = x_ + width_ / 2;
             int my = y_ + height_ / 2;

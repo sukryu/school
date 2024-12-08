@@ -10,7 +10,16 @@ namespace dune {
          * @brief 맵 상의 위치를 나타내는 구조체입니다.
          */
         struct Position {
-            int row, column;
+            int row;
+            int column;
+
+            Position operator+(const Position& other) const {
+                return { row + other.row, column + other.column };
+            }
+
+            Position operator-(const Position& other) const {
+                return { row - other.row, column - other.column };
+            }
 
             bool operator==(const Position& other) const {
                 return row == other.row && column == other.column;
@@ -21,8 +30,7 @@ namespace dune {
             }
 
             bool is_valid() const {
-                return row >= 0 && row < constants::MAP_HEIGHT &&
-                    column >= 0 && column < constants::MAP_WIDTH;
+                return row >= 0 && column >= 0;
             }
         };
 
@@ -81,6 +89,7 @@ namespace dune {
             Build_Fighter,
             Build_Factory,
             Build_HeavyTank,
+            ShowUnitList,
             Undefined
         };
 
@@ -151,6 +160,19 @@ namespace dune {
             Paused,
             GameOver
         };
+
+        struct Node {
+            types::Position position;
+            int gCost; // 시작점에서 현재 노드까지의 비용
+            int hCost; // 휴리스틱(목표까지의 추정 비용)
+            int fCost() const { return gCost + hCost; } // 총 비용
+            types::Position parent; // 부모 노드의 위치 (경로 재구성에 사용)
+
+            bool operator>(const Node& other) const {
+                return fCost() > other.fCost(); // 우선순위 큐를 위해 필요
+            }
+        };
+
 	} // namespace types
 } // namespace dune
 
@@ -168,3 +190,4 @@ namespace std {
         }
     };
 }
+

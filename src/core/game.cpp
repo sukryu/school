@@ -3,6 +3,8 @@
 #include "utils/utils.hpp"
 #include <thread>
 #include <array>
+#include <map>
+#include <iostream>
 
 namespace dune {
     namespace core {
@@ -112,15 +114,21 @@ namespace dune {
         * PDF 3. 샌드웜
         */
         void Game::initSandworms() {
-            map.addUnit(std::make_unique<managers::UnitManager::Unit>(
+            auto sandworm1 = std::make_unique<managers::UnitManager::Unit>(
                 types::UnitType::Sandworm,
-                types::Position{ constants::MAP_HEIGHT - 6, 5 }  // 좌하단 기지 근처
-            ));
+                types::Position{ constants::MAP_HEIGHT - 6, 5 }
+            );
+            sandworm1->initializeAI(); // AI 초기화
 
-            map.addUnit(std::make_unique<managers::UnitManager::Unit>(
+            map.addUnit(std::move(sandworm1));
+
+            auto sandworm2 = std::make_unique<managers::UnitManager::Unit>(
                 types::UnitType::Sandworm,
-                types::Position{ 5, constants::MAP_WIDTH - 6 }  // 우상단 기지 근처
-            ));
+                types::Position{ 5, constants::MAP_WIDTH - 6 }
+            );
+            sandworm2->initializeAI(); // AI 초기화
+
+            map.addUnit(std::move(sandworm2));
         }
 
         /**
@@ -241,6 +249,9 @@ namespace dune {
             else if (key == types::Key::Esc) {
                 handleEscape();
             }
+            else if (key == types::Key::ShowUnitList) {
+                showUnitList();
+            }
             else if (key == types::Key::Build_Plate) {
                 handleBuildPlate();
             }
@@ -295,31 +306,42 @@ namespace dune {
 
         void Game::handleBuildPlate() {
             types::Position pos = cursor.getCurrentPosition();
-            
-            // 2x2 크기의 장판 생성
-            auto plate = std::make_unique<managers::BuildingManager::Building>(
-                types::Camp::Common,
-                L"Plate",
-                L"건물 건설용 장판",
-                1,  // 건설 비용
-                pos,
-                2,  // width
-                2,  // height
-                10000,
-                types::UnitType::None
-            );
 
             // 설치 가능 여부 확인
-            if (placeBuilding(std::move(plate))) {
+            auto& terrainManager = map.getTerrainManager();
+            bool canPlace = true;
+
+            // 2x2 크기의 장판을 설치할 수 있는지 확인
+            for (int row = pos.row; row < pos.row + 2; ++row) {
+                for (int col = pos.column; col < pos.column + 2; ++col) {
+                    types::Position tilePos{ row, col };
+
+                    // 맵 범위 및 지형 체크
+                    if (!tilePos.is_valid() ||
+                        terrainManager.getTerrain(tilePos).getType() != types::TerrainType::Desert) {
+                        display.addSystemMessage(L"Cannot place Plate here.");
+                        canPlace = false;
+                        break;
+                    }
+                }
+                if (!canPlace) break;
+            }
+
+            if (canPlace) {
                 if (resource.spice < 1) {
-                    display.addSystemMessage(L"Not enough spice to build Plate");
+                    display.addSystemMessage(L"Not enough spice to build Plate.");
+                    return;
                 }
-                else {
-                    display.addSystemMessage(L"The board has been installed.");
-                    resource.spice -= 1;
+
+                // Plate 설치
+                for (int row = pos.row; row < pos.row + 2; ++row) {
+                    for (int col = pos.column; col < pos.column + 2; ++col) {
+                        terrainManager.setTerrain({ row, col }, types::TerrainType::Plate);
+                    }
                 }
-            } else {
-                display.addSystemMessage(L"The board cannot be installed in this location.");
+
+                resource.spice -= 1;
+                display.addSystemMessage(L"The Plate has been installed.");
             }
         }
 
@@ -824,16 +846,16 @@ namespace dune {
                     if (building->getName() == L"Base") {
                         command_text = { L"H: Build Harvester", L"ESC: Cancel" };
                     }
-                    if (building->getName() == L"Barracks") {
+                    else if (building->getName() == L"Barracks") {
                         command_text = { L"S: Produce Soldier", L"ESC: Cancel" };
                     }
-                    if (building->getName() == L"Shelter") {
+                    else  if (building->getName() == L"Shelter") {
                         command_text = { L"F: Produce Fremen", L"ESC: Cancel" };
                     }
-                    if (building->getName() == L"Arena") {
+                    else if (building->getName() == L"Arena") {
                         command_text = { L"R: Produce Fighter", L"ESC: Cancel" };
                     }
-                    if (building->getName() == L"Factory") {
+                    else if (building->getName() == L"Factory") {
                         command_text = { L"T: Produce heavy Tank", L"ESC: Cancel" };
                     }
                     else {
@@ -879,12 +901,56 @@ namespace dune {
         }
 
         bool Game::placeBuilding(std::unique_ptr<managers::BuildingManager::Building> building) {
-            auto pos = building->getPosition();
-            if (building->isPlaceable(pos, map.getTerrainManager())) {
+            if (building->getName() == L"Plate") {
                 map.addBuilding(std::move(building));
-                return true;
+                return true; 
+            };
+            auto pos = building->getPosition();
+            const auto& terrainManager = map.getTerrainManager();
+
+            // 설치 위치 확인 (건물이 설치 가능한 위치인지 확인)
+            if (!building->isPlaceable(pos, terrainManager)) {
+                return false;
             }
-            return false;
+
+            // **장판 확인 로직 추가**
+            for (int row = pos.row; row < pos.row + building->getHeight(); ++row) {
+                for (int col = pos.column; col < pos.column + building->getWidth(); ++col) {
+                    types::Position tilePos{ row, col };
+
+                    // 장판이 없는 경우 설치 불가
+                    if (terrainManager.getTerrain(tilePos).getType() != types::TerrainType::Plate) {
+                        display.addSystemMessage(L"A Plate is required to build here.");
+                        return false;
+                    }
+                }
+            }
+            // 건물을 맵에 추가
+            map.addBuilding(std::move(building));
+            return true;
         }
+
+        void Game::showUnitList() {
+            std::wcout << L"Executing Show Unit List" << std::endl; // 디버깅용
+            std::map<wchar_t, int> unitCounts;
+            std::wstring status_text = L"Unit List:\n";
+
+            const auto& units = map.getUnitManager().getUnits();
+            for (const auto& entry : units) {
+                const auto& unit = entry.second;
+                wchar_t representation = unit->getRepresentation();
+                unitCounts[representation]++;
+            }
+
+            for (const auto& [representation, count] : unitCounts) {
+                status_text += std::wstring(1, representation) + L": " + std::to_wstring(count) + L"\n";
+            }
+
+            display.updateStatus(status_text);
+            std::wcout << status_text << std::endl; // 디버깅용
+        }
+
+
+
     } // namespace core
 } // namespace dune

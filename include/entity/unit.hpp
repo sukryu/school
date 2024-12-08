@@ -1,9 +1,15 @@
 #pragma once
-#include "../core/entity.hpp"
-#include "../utils/types.hpp"
+#include "core/entity.hpp"
+#include "utils/types.hpp"
+#include "sandworm_ai.hpp"
 #include <memory>
-#include <unordered_map>
 #include <chrono>
+#include <string>
+
+namespace dune {
+    namespace core { class Map; }
+    namespace entity { class SandwormAI; }
+}
 
 namespace dune {
     namespace entity {
@@ -99,6 +105,14 @@ namespace dune {
              */
             void consumeTarget();
 
+            std::wstring getInfo() const;
+
+            /**
+             * @brief 유닛의 진영 정보를 반환합니다.
+             * @return types::Camp 유닛의 진영.
+             */
+            types::Camp getCamp() const { return camp_; }
+
             /**
              * @brief 샌드웜이 스파이스를 배출할 수 있는지 확인합니다.
              * @return true 배출 가능하면 true.
@@ -118,6 +132,14 @@ namespace dune {
              */
             bool shouldExcrete() const;
 
+            void initializeAI() {
+                if (type_ == types::UnitType::Sandworm) {
+                    ai_ = std::make_unique<SandwormAI>();
+                }
+            }
+            SandwormAI* getAI() { return ai_.get(); }
+            void update(core::Map& map, std::chrono::milliseconds currentTime);
+
         private:
             types::Camp camp_;
             types::UnitType type_;
@@ -130,6 +152,7 @@ namespace dune {
             types::Position position_;
             int length_ = 1;  // 샌드웜 길이
             std::chrono::milliseconds lastMoveTime_{ 0 };
+            std::unique_ptr<SandwormAI> ai_;
         };
     } // namespace entity
 } // namespace dune
