@@ -91,6 +91,7 @@ namespace dune {
                 0,
                 types::Position{ constants::MAP_HEIGHT - 4, 0 },
                 2, 2,
+                50,
                 types::UnitType::Harvester
             ));
 
@@ -102,6 +103,7 @@ namespace dune {
                 0,
                 types::Position{ 0, constants::MAP_WIDTH - 4 },
                 2, 2,
+                50,
                 types::UnitType::Harvester
             ));
         }
@@ -214,6 +216,18 @@ namespace dune {
                         handleBuildHarvester(building);
                         return;
                     }
+                    else if (building->getName() == L"Barracks" && key == types::Key::Build_Soldier) {
+                        handleBuildSoldier(building);
+                    }
+                    else if (building->getName() == L"Shelter" && key == types::Key::Build_Fremen) {
+                        handleBuildFremen(building);
+                    }
+                    else if (building->getName() == L"Arena" && key == types::Key::Build_Fighter) {
+                        handleBuildFighter(building);
+                    }
+                    else if (building->getName() == L"Factory" && key == types::Key::Build_HeavyTank) {
+                        handleBuildH_Tank(building);
+                    }
                 }
             }
 
@@ -229,6 +243,24 @@ namespace dune {
             }
             else if (key == types::Key::Build_Plate) {
                 handleBuildPlate();
+            }
+            else if (key == types::Key::Build_Dormitory) {
+                handleBuildDormitory();
+            }
+            else if (key == types::Key::Build_Garage) {
+                handleBuildGarage();
+            }
+            else if (key == types::Key::Build_Barracks) {
+                handleBuildBarracks();
+            }
+            else if (key == types::Key::Build_Shelter) {
+                handleBuildShelter();
+            }
+            else if (key == types::Key::Build_Arena) {
+                handleBuildArena();
+            }
+            else if (key == types::Key::Build_Factory) {
+                handleBuildFactory();
             }
             else if (utils::is_arrow_key(key)) {
                 handleMovement(key);
@@ -269,19 +301,201 @@ namespace dune {
                 types::Camp::Common,
                 L"Plate",
                 L"건물 건설용 장판",
-                0,  // 건설 비용
+                1,  // 건설 비용
                 pos,
                 2,  // width
                 2,  // height
+                10000,
                 types::UnitType::None
             );
 
             // 설치 가능 여부 확인
-            if (plate->isPlaceable(pos, map.getTerrainManager())) {
-                map.addBuilding(std::move(plate));
-                display.addSystemMessage(L"The board has been installed.");
+            if (placeBuilding(std::move(plate))) {
+                if (resource.spice < 1) {
+                    display.addSystemMessage(L"Not enough spice to build Plate");
+                }
+                else {
+                    display.addSystemMessage(L"The board has been installed.");
+                    resource.spice -= 1;
+                }
             } else {
                 display.addSystemMessage(L"The board cannot be installed in this location.");
+            }
+        }
+
+        void Game::handleBuildDormitory() {
+            types::Position pos = cursor.getCurrentPosition();
+
+            auto Dormitory = std::make_unique<managers::BuildingManager::Building>(
+                types::Camp::Common,
+                L"Dormitory",
+                L"숙소 (인구 최대치 증가 +10)",
+                2,
+                pos,
+                2,
+                2,
+                10,
+                types::UnitType::None
+            );
+
+            if (placeBuilding(std::move(Dormitory))) {
+                if (resource.spice < 2) {
+                    display.addSystemMessage(L"Not enough spice to build Dormitory");
+                }
+                else {
+                    display.addSystemMessage(L"The Dormitory has been installed.");
+                    resource.spice -= 2;
+                    resource.population_max += 10;
+                }
+            }
+            else {
+                display.addSystemMessage(L"The Dormitory cannot be installed in this location.");
+            }
+        }
+
+        void Game::handleBuildGarage() {
+            types::Position pos = cursor.getCurrentPosition();
+
+            auto garage = std::make_unique<managers::BuildingManager::Building>(
+                types::Camp::Common,
+                L"Garage",
+                L"창고 (스파이스 최대치 증가 +10)",
+                4,
+                pos,
+                2,
+                2,
+                10,
+                types::UnitType::None
+            );
+
+            if (placeBuilding(std::move(garage))) {
+                if (resource.spice < 4) {
+                    display.addSystemMessage(L"Not enough spice to build garage");
+                }
+                else {
+                    display.addSystemMessage(L"The garage has been installed.");
+                    resource.spice -= 4;
+                    resource.spice_max += 10;
+                }
+            }
+            else {
+                display.addSystemMessage(L"The garage cannot be installed in this location.");
+            }
+        }
+
+        void Game::handleBuildBarracks() {
+            types::Position pos = cursor.getCurrentPosition();
+
+            auto barracks = std::make_unique<managers::BuildingManager::Building>(
+                types::Camp::ArtLadies,
+                L"Barracks",
+                L"병영 (보병 생산)",
+                4,
+                pos,
+                2,
+                2,
+                20,
+                types::UnitType::Soldier
+            );
+
+            if (placeBuilding(std::move(barracks))) {
+                if (resource.spice < 4) {
+                    display.addSystemMessage(L"Not enough spice to build barracks");
+                }
+                else {
+                    display.addSystemMessage(L"The barracks has been installed.");
+                    resource.spice -= 4;
+                }
+            }
+            else {
+                display.addSystemMessage(L"The barracks cannot be installed in this location.");
+            }
+        }
+
+        void Game::handleBuildShelter() {
+            types::Position pos = cursor.getCurrentPosition();
+
+            auto shelter = std::make_unique<managers::BuildingManager::Building>(
+                types::Camp::ArtLadies,
+                L"Shelter",
+                L"은신처 (특수유닛 생산)",
+                5,
+                pos,
+                2,
+                2,
+                30,
+                types::UnitType::Fremen
+            );
+
+            if (placeBuilding(std::move(shelter))) {
+                if (resource.spice < 5) {
+                    display.addSystemMessage(L"Not enough spice to build shelter");
+                }
+                else {
+                    display.addSystemMessage(L"The shelter has been installed.");
+                    resource.spice -= 5;
+                }
+            }
+            else {
+                display.addSystemMessage(L"The shelter cannot be installed in this location.");
+            }
+        }
+
+        void Game::handleBuildArena() {
+            types::Position pos = cursor.getCurrentPosition();
+
+            auto arena = std::make_unique<managers::BuildingManager::Building>(
+                types::Camp::Harkonnen,
+                L"Arena",
+                L"투기장 (투사 생산)",
+                4,
+                pos,
+                2,
+                2,
+                15,
+                types::UnitType::Fighter
+            );
+
+            if (placeBuilding(std::move(arena))) {
+                if (resource.spice < 3) {
+                    display.addSystemMessage(L"Not enough spice to build arena");
+                }
+                else {
+                    display.addSystemMessage(L"The arena has been installed.");
+                    resource.spice -= 3;
+                }
+            }
+            else {
+                display.addSystemMessage(L"The arena cannot be installed in this location.");
+            }
+        }
+
+        void Game::handleBuildFactory() {
+            types::Position pos = cursor.getCurrentPosition();
+
+            auto factory = std::make_unique<managers::BuildingManager::Building>(
+                types::Camp::Harkonnen,
+                L"Factory",
+                L"공장 (중전차 생산)",
+                5,
+                pos,
+                2,
+                2,
+                30,
+                types::UnitType::HeavyTank
+            );
+
+            if (placeBuilding(std::move(factory))) {
+                if (resource.spice < 5) {
+                    display.addSystemMessage(L"Not enough spice to build factory");
+                }
+                else {
+                    display.addSystemMessage(L"The factory has been installed.");
+                    resource.spice -= 5;
+                }
+            }
+            else {
+                display.addSystemMessage(L"The factory cannot be installed in this location.");
             }
         }
 
@@ -359,6 +573,211 @@ namespace dune {
             display.addSystemMessage(L"A new harvester ready");
         }
 
+        void Game::handleBuildSoldier(const Building* building) {
+            // 자원 체크
+            if (resource.spice < 1) {
+                display.addSystemMessage(L"Not enough spice");
+                return;
+            }
+            if (resource.population + 1 > resource.population_max) {
+                display.addSystemMessage(L"Not enough population capacity");
+                return;
+            }
+
+            // 커서 위치 가져오기
+            types::Position cursor_pos = cursor.getCurrentPosition();
+            types::Position base_pos = building->getPosition();
+
+            // 본진과 커서 사이의 거리 계산
+            int distance = utils::manhattanDistance(cursor_pos, base_pos);
+
+            // 거리가 20 이상이면 설치 불가
+            if (distance > 20) {
+                display.addSystemMessage(L"Too far from the base");
+                return;
+            }
+
+            // 설치 위치 유효성 검사
+            if (!map.getTerrainManager().getTerrain(cursor_pos).isWalkable() ||
+                map.getEntityAt<Unit>(cursor_pos) ||
+                map.getEntityAt<Building>(cursor_pos)) {
+                display.addSystemMessage(L"Cannot place Soldier here");
+                return;
+            }
+
+            // 하베스터 생성
+            map.addUnit(std::make_unique<managers::UnitManager::Unit>(
+                types::UnitType::Soldier,
+                1,      // build_cost
+                1,      // population
+                cursor_pos,
+                15,     // health
+                constants::SOLDIER_SPEED,
+                5,      // attack_power
+                1,      // sight_range
+                types::Camp::ArtLadies
+            ));
+
+            // 자원 소비
+            resource.spice -= 1;
+            resource.population += 1;
+            display.addSystemMessage(L"A new Soldier ready");
+        }
+
+        void Game::handleBuildFremen(const Building* building) {
+            // 자원 체크
+            if (resource.spice < 5) {
+                display.addSystemMessage(L"Not enough spice");
+                return;
+            }
+            if (resource.population + 2 > resource.population_max) {
+                display.addSystemMessage(L"Not enough population capacity");
+                return;
+            }
+
+            // 커서 위치 가져오기
+            types::Position cursor_pos = cursor.getCurrentPosition();
+            types::Position base_pos = building->getPosition();
+
+            // 본진과 커서 사이의 거리 계산
+            int distance = utils::manhattanDistance(cursor_pos, base_pos);
+
+            // 거리가 20 이상이면 설치 불가
+            if (distance > 20) {
+                display.addSystemMessage(L"Too far from the base");
+                return;
+            }
+
+            // 설치 위치 유효성 검사
+            if (!map.getTerrainManager().getTerrain(cursor_pos).isWalkable() ||
+                map.getEntityAt<Unit>(cursor_pos) ||
+                map.getEntityAt<Building>(cursor_pos)) {
+                display.addSystemMessage(L"Cannot place Fremen here");
+                return;
+            }
+
+            // 하베스터 생성
+            map.addUnit(std::make_unique<managers::UnitManager::Unit>(
+                types::UnitType::Fremen,
+                5,      // build_cost
+                2,      // population
+                cursor_pos,
+                25,     // health
+                constants::FREMEN_SPEED,
+                15,      // attack_power
+                8,      // sight_range
+                types::Camp::ArtLadies
+            ));
+
+            // 자원 소비
+            resource.spice -= 5;
+            resource.population += 2;
+            display.addSystemMessage(L"A new Fremen ready");
+        }
+
+        void Game::handleBuildFighter(const Building* building) {
+            // 자원 체크
+            if (resource.spice < 1) {
+                display.addSystemMessage(L"Not enough spice");
+                return;
+            }
+            if (resource.population + 1 > resource.population_max) {
+                display.addSystemMessage(L"Not enough population capacity");
+                return;
+            }
+
+            // 커서 위치 가져오기
+            types::Position cursor_pos = cursor.getCurrentPosition();
+            types::Position base_pos = building->getPosition();
+
+            // 본진과 커서 사이의 거리 계산
+            int distance = utils::manhattanDistance(cursor_pos, base_pos);
+
+            // 거리가 20 이상이면 설치 불가
+            if (distance > 20) {
+                display.addSystemMessage(L"Too far from the base");
+                return;
+            }
+
+            // 설치 위치 유효성 검사
+            if (!map.getTerrainManager().getTerrain(cursor_pos).isWalkable() ||
+                map.getEntityAt<Unit>(cursor_pos) ||
+                map.getEntityAt<Building>(cursor_pos)) {
+                display.addSystemMessage(L"Cannot place Soldier here");
+                return;
+            }
+
+            // 하베스터 생성
+            map.addUnit(std::make_unique<managers::UnitManager::Unit>(
+                types::UnitType::Fighter,
+                1,      // build_cost
+                1,      // population
+                cursor_pos,
+                10,     // health
+                constants::FIGHTER_SPEED,
+                6,      // attack_power
+                1,      // sight_range
+                types::Camp::Harkonnen
+            ));
+
+            // 자원 소비
+            resource.spice -= 1;
+            resource.population += 1;
+            display.addSystemMessage(L"A new Fighter ready");
+        }
+
+        void Game::handleBuildH_Tank(const Building* building) {
+            // 자원 체크
+            if (resource.spice < 12) {
+                display.addSystemMessage(L"Not enough spice");
+                return;
+            }
+            if (resource.population + 5 > resource.population_max) {
+                display.addSystemMessage(L"Not enough population capacity");
+                return;
+            }
+
+            // 커서 위치 가져오기
+            types::Position cursor_pos = cursor.getCurrentPosition();
+            types::Position base_pos = building->getPosition();
+
+            // 본진과 커서 사이의 거리 계산
+            int distance = utils::manhattanDistance(cursor_pos, base_pos);
+
+            // 거리가 10 이상이면 설치 불가
+            if (distance > 10) {
+                display.addSystemMessage(L"Too far from the base");
+                return;
+            }
+
+            // 설치 위치 유효성 검사
+            if (!map.getTerrainManager().getTerrain(cursor_pos).isWalkable() ||
+                map.getEntityAt<Unit>(cursor_pos) ||
+                map.getEntityAt<Building>(cursor_pos)) {
+                display.addSystemMessage(L"Cannot place Heavy Tank here");
+                return;
+            }
+
+            // 하베스터 생성
+            map.addUnit(std::make_unique<managers::UnitManager::Unit>(
+                types::UnitType::HeavyTank,
+                12,      // build_cost
+                5,      // population
+                cursor_pos,
+                60,     // health
+                constants::HEAVY_TANK_SPEED,
+                40,      // attack_power
+                4,      // sight_range
+                types::Camp::Harkonnen
+            ));
+
+            // 자원 소비
+            resource.spice -= 12;
+            resource.population += 5;
+            display.addSystemMessage(L"A new Heavy Tank ready");
+        }
+
+
         void Game::handleSelection() {
             types::Position pos = cursor.getCurrentPosition();
             current_selection.position_ = pos;
@@ -405,6 +824,18 @@ namespace dune {
                     if (building->getName() == L"Base") {
                         command_text = { L"H: Build Harvester", L"ESC: Cancel" };
                     }
+                    if (building->getName() == L"Barracks") {
+                        command_text = { L"S: Produce Soldier", L"ESC: Cancel" };
+                    }
+                    if (building->getName() == L"Shelter") {
+                        command_text = { L"F: Produce Fremen", L"ESC: Cancel" };
+                    }
+                    if (building->getName() == L"Arena") {
+                        command_text = { L"R: Produce Fighter", L"ESC: Cancel" };
+                    }
+                    if (building->getName() == L"Factory") {
+                        command_text = { L"T: Produce heavy Tank", L"ESC: Cancel" };
+                    }
                     else {
                         command_text = { L"No Actions Available" };
                     }
@@ -445,6 +876,15 @@ namespace dune {
 
             display.updateStatus(status_text);
             display.updateCommands(command_text);
+        }
+
+        bool Game::placeBuilding(std::unique_ptr<managers::BuildingManager::Building> building) {
+            auto pos = building->getPosition();
+            if (building->isPlaceable(pos, map.getTerrainManager())) {
+                map.addBuilding(std::move(building));
+                return true;
+            }
+            return false;
         }
     } // namespace core
 } // namespace dune

@@ -17,6 +17,9 @@ namespace dune {
             wint_t byte = _getwch();
             types::Key current_key;
 
+            // Shift 상태 확인
+            bool shiftPressed = (GetKeyState(VK_SHIFT) & 0x8000) != 0;
+
             switch (byte) {
             case L'q': case L'Q':
                 current_key = types::Key::Quit;
@@ -27,14 +30,86 @@ namespace dune {
             case 27:  // ESC
                 current_key = types::Key::Esc;
                 break;
-            case 'p':
-            case 'P':
-                current_key = types::Key::Build_Plate;
+            case 'p': case 'P':
+                if (shiftPressed) {
+                    current_key = types::Key::Build_Plate;
+                }
+                else {
+                    current_key = types::Key::Undefined;
+                }
                 break;
-            case 'h':
-            case 'H':
+
+            case 'd': case 'D':
+                if (shiftPressed) {
+                    current_key = types::Key::Build_Dormitory;
+                }
+                else {
+                    current_key = types::Key::Undefined;
+                }
+                break;
+
+            case 'g': case 'G':
+                if (shiftPressed) {
+                    current_key = types::Key::Build_Garage;
+                }
+                else {
+                    current_key = types::Key::Undefined;
+                }
+                break;
+
+            case 'k': case 'K':
+                if (shiftPressed) {
+                    current_key = types::Key::Build_Barracks;
+                }
+                else {
+                    current_key = types::Key::Undefined;
+                }
+                break;
+
+            case 's': case 'S':
+                if (shiftPressed) {
+                    current_key = types::Key::Build_Shelter;
+                }
+                else {
+                    current_key = types::Key::Build_Soldier;
+                }
+                break;
+
+            case 'a': case 'A':
+                if (shiftPressed) {
+                    current_key = types::Key::Build_Arena;
+                }
+                else {
+                    current_key = types::Key::Attack;
+                }
+                break;
+
+            case 'f': case 'F':
+                if (shiftPressed) {
+                    current_key = types::Key::Build_Factory;
+                }
+                else {
+                    current_key = types::Key::Build_Fremen;
+                }
+                break;
+
+                // 유닛 명령 (Shift 없이)
+            case 'h': case 'H':
                 current_key = types::Key::Build_Harvester;
                 break;
+
+            case 'm': case 'M':
+                current_key = types::Key::Move;
+                break;
+
+            case 'r': case 'R':
+                current_key = types::Key::Build_Fighter;
+                break;
+
+            case 't': case 'T':
+                current_key = types::Key::Build_HeavyTank;
+                break;
+
             case 224: case 0: {  // Special keys (arrows)
                 byte = _getwch();
                 switch (byte) {

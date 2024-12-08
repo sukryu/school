@@ -107,6 +107,36 @@ namespace dune {
             void handleBuildPlate();
             
             /**
+             * @brief 숙소를 설치합니다.
+             */
+            void handleBuildDormitory();
+
+            /**
+             * @brief 창고를 설치합니다.
+             */
+            void handleBuildGarage();
+
+            /**
+             * @brief 병영을 설치합니다.
+             */
+            void handleBuildBarracks();
+
+            /**
+             * @brief 은신처을 설치합니다.
+             */
+            void handleBuildShelter();
+
+            /**
+             * @brief 투기장을 설치합니다.
+             */
+            void handleBuildArena();
+
+            /**
+             * @brief 공장을 설치합니다.
+             */
+            void handleBuildFactory();
+
+            /**
              * @brief 건물 근처의 빈 공간을 찾습니다.
              * @param building 기준이 되는 건물 포인터.
              * @return types::Position 빈 공간의 위치.
@@ -118,6 +148,30 @@ namespace dune {
              * @param building 하베스터를 생산할 건물(본진).
              */
             void handleBuildHarvester(const Building* building);
+
+            /**
+             * @brief 보병을 생산합니다.
+             * @param building 보병을 생상할 건물(병영).
+             */
+            void handleBuildSoldier(const Building* building);
+
+            /**
+             * @brief 프레멘을 생산합니다.
+             * @param building 프레멘을 생상할 건물(은신처).
+             */
+            void handleBuildFremen(const Building* building);
+
+            /**
+             * @brief 투사을 생산합니다.
+             * @param building 투사을 생상할 건물(투기장).
+             */
+            void handleBuildFighter(const Building* building);
+
+            /**
+             * @brief 중전차을 생산합니다.
+             * @param building 중전차을 생상할 건물(공장).
+             */
+            void handleBuildH_Tank(const Building* building);
 
             /**
              * @brief 선택을 취소하거나 현재 작업을 종료합니다.
@@ -143,6 +197,8 @@ namespace dune {
              * @brief 현재 게임 상태를 화면에 렌더링합니다.
              */
             void render();
+
+            bool placeBuilding(std::unique_ptr<managers::BuildingManager::Building> building);
 
             // 게임 상태
             std::chrono::milliseconds sys_clock;

@@ -71,6 +71,16 @@ namespace dune {
             Cancel,
             Build_Plate,
             Build_Harvester,
+            Build_Dormitory,
+            Build_Garage,
+            Build_Barracks,
+            Build_Soldier,
+            Build_Shelter,
+            Build_Fremen,
+            Build_Arena,
+            Build_Fighter,
+            Build_Factory,
+            Build_HeavyTank,
             Undefined
         };
 

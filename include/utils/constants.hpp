@@ -29,6 +29,10 @@ namespace dune {
         constexpr int SANDSTORM_DAMAGE = 50;
         constexpr int SANDWORM_SPEED = 10000;
         constexpr int HARVESTER_SPEED = 2000;
+        constexpr int SOLDIER_SPEED = 800;
+        constexpr int FREMEN_SPEED = 200;
+        constexpr int FIGHTER_SPEED = 600;
+        constexpr int HEAVY_TANK_SPEED = 4000;
 
         /**
          * @brief 콘솔 색상 코드를 정의하는 네임스페이스입니다.

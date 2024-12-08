@@ -49,30 +49,52 @@ namespace dune {
             types::Position nearestPosition = fromPosition;
             int minDistance = std::numeric_limits<int>::max();
 
-            for (const auto& entry : unitManager_.getUnits()) {
-                const auto& unitPtr = entry.second; // std::unique_ptr<Unit>&
+            int searchRadius = 10; // 초기 검색 반경
+            std::vector<const entity::Unit*> candidates;
 
-                // 유닛 타입 비교
-                if (unitPtr->getType() == excludeType) {
-                    continue;
+            while (true) {
+                // 검색 반경 내 유닛 쿼리
+                unitManager_.getQuadTree().queryRange(
+                    fromPosition.column - searchRadius,
+                    fromPosition.row - searchRadius,
+                    searchRadius * 2,
+                    searchRadius * 2,
+                    candidates);
+
+                for (const auto* unit : candidates) {
+                    // 제외할 타입 확인
+                    if (unit->getType() == excludeType) {
+                        continue;
+                    }
+
+                    // 샌드웜 타겟 적합성 확인
+                    if (!isValidSandwormTarget(unit)) {
+                        continue;
+                    }
+
+                    // 거리 계산
+                    int distance = utils::manhattanDistance(fromPosition, unit->getPosition());
+
+                    // 최소 거리 갱신
+                    if (distance < minDistance) {
+                        minDistance = distance;
+                        nearestPosition = unit->getPosition();
+                    }
                 }
 
-                // 샌드웜 타겟 확인 시 raw pointer 필요
-                if (!isValidSandwormTarget(unitPtr.get())) {
-                    continue;
+                // 최소 거리 갱신이 되었거나, 검색 반경이 맵 크기를 초과하면 종료
+                if (minDistance < searchRadius || searchRadius > std::max(width_, height_)) {
+                    break;
                 }
 
-                // 유닛 위치 가져오기
-                types::Position unitPosition = unitPtr->getPosition();
-                int distance = utils::manhattanDistance(unitPosition, fromPosition);
-
-                if (distance < minDistance) {
-                    minDistance = distance;
-                    nearestPosition = unitPosition;
-                }
+                // 검색 반경 확장
+                searchRadius *= 2;
+                candidates.clear();
             }
+
             return nearestPosition;
         }
+
 
         void Map::removeUnit(Unit* unit) {
             if (unit) {

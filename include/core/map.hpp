@@ -134,6 +134,8 @@ namespace dune {
              */
             int getHeight() const { return height_; }
 
+
+
         private:
             void updateSandworm(Unit* unit, std::chrono::milliseconds currentTime);
             types::Position calculateSandwormMove(const Unit* sandworm, const types::Position& targetPosition);
