@@ -2,6 +2,7 @@
 #include "core/entity.hpp"
 #include "utils/types.hpp"
 #include "sandworm_ai.hpp"
+#include "harvester_ai.hpp"
 #include <memory>
 #include <chrono>
 #include <string>
@@ -132,12 +133,18 @@ namespace dune {
              */
             bool shouldExcrete() const;
 
+            void initializeHarvesterAttributes();
+
             void initializeAI() {
                 if (type_ == types::UnitType::Sandworm) {
-                    ai_ = std::make_unique<SandwormAI>();
+                    sandworm_ai_ = std::make_unique<SandwormAI>();
+                }
+                else if (type_ == types::UnitType::Harvester) {
+                    harvester_ai_ = std::make_unique<HarvesterAI>();
                 }
             }
-            SandwormAI* getAI() { return ai_.get(); }
+            SandwormAI* getSandwormAI() { return sandworm_ai_.get(); }
+            HarvesterAI* getHarvesterAI() { return harvester_ai_.get(); }
             void update(core::Map& map, std::chrono::milliseconds currentTime);
 
         private:
@@ -152,7 +159,8 @@ namespace dune {
             types::Position position_;
             int length_ = 1;  // 샌드웜 길이
             std::chrono::milliseconds lastMoveTime_{ 0 };
-            std::unique_ptr<SandwormAI> ai_;
+            std::unique_ptr<SandwormAI> sandworm_ai_;
+            std::unique_ptr<HarvesterAI> harvester_ai_;
         };
     } // namespace entity
 } // namespace dune

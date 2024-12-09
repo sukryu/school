@@ -10,7 +10,7 @@ namespace dune {
     namespace ui {
 
         MessageWindow::MessageWindow(int x, int y, int width, int height)
-            : BaseWindow(x, y, width, height) {}
+            : BaseWindow(x, y, width, height), messages_() {}
 
         std::wstring MessageWindow::toWString(const std::string& str) const {
             std::wstring_convert<std::codecvt_utf8_utf16<wchar_t>> converter;
@@ -25,11 +25,10 @@ namespace dune {
                 message.find(L"Destroy") != std::wstring::npos ||
                 message.find(L"Completed") != std::wstring::npos;
 
-            messages_.push_back({
+            messages_.push_back(TimedMessage(
                 message,
-                std::chrono::steady_clock::now(),
                 isImportant
-                });
+                ));
 
             // 최대 메시지 수 초과시 오래된 메시지 제거
             while (messages_.size() > MAX_MESSAGES) {

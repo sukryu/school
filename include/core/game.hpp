@@ -198,6 +198,8 @@ namespace dune {
              */
             void render();
 
+            void addHarvester(const types::Position& pos, types::Camp camp);
+
             bool placeBuilding(std::unique_ptr<managers::BuildingManager::Building> building);
 
             void showUnitList();

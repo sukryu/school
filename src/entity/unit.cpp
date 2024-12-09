@@ -10,7 +10,13 @@ namespace dune {
         // Unit 클래스 구현
 
         Unit::Unit(types::UnitType type, int buildCost, int population, types::Position pos, int health, int speed, int attackPower, int sightRange, types::Camp camp)
-            : type_(type), buildCost_(buildCost), population_(population), position_(pos), health_(health), speed_(speed), attackPower_(attackPower), sightRange_(sightRange), camp_(camp) {}
+            : type_(type), buildCost_(buildCost), population_(population), position_(pos), health_(health), speed_(speed), attackPower_(attackPower), sightRange_(sightRange), camp_(camp), harvester_ai_(nullptr) {
+            if (type_ == types::UnitType::Harvester) {
+                initializeHarvesterAttributes();
+            }
+        } 
+
+
 
         Unit::Unit(types::UnitType type, types::Position position)
             : type_(type), position_(position), lastMoveTime_(0) {
@@ -25,7 +31,7 @@ namespace dune {
                 length_ = 1;
                 camp_ = types::Camp::Common;
 
-                ai_ = std::make_unique<SandwormAI>();
+                sandworm_ai_ = std::make_unique<SandwormAI>();
                 break;
             default:
                 buildCost_ = 5;
@@ -37,6 +43,21 @@ namespace dune {
                 camp_ = types::Camp::Common;
                 break;
             }
+        }
+
+        void Unit::initializeHarvesterAttributes() {
+            if (!position_.is_valid()) {
+                throw std::runtime_error("Invalid position for Harvester initialization");
+            }
+
+            type_ = types::UnitType::Harvester;
+            buildCost_ = 5;
+            population_ = 5;
+            health_ = 70;
+            speed_ = constants::HARVESTER_SPEED;
+            attackPower_ = 0;
+            sightRange_ = 0;
+            harvester_ai_ = std::make_unique<HarvesterAI>(position_);
         }
 
         wchar_t Unit::getRepresentation() const {

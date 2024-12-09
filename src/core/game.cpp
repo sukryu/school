@@ -5,6 +5,7 @@
 #include <array>
 #include <map>
 #include <iostream>
+#include <regex>
 
 namespace dune {
     namespace core {
@@ -131,35 +132,23 @@ namespace dune {
             map.addUnit(std::move(sandworm2));
         }
 
+        void Game::addHarvester(const types::Position& pos, types::Camp camp) {
+            auto harvester = std::make_unique<managers::UnitManager::Unit>(
+                types::UnitType::Harvester, pos, camp
+            );
+            harvester->initializeAI();
+            map.addUnit(std::move(harvester));
+
+            std::wstring campName = (camp == types::Camp::ArtLadies) ? L"ArtLadies" : L"Harkonnen";
+            display.addSystemMessage(campName + L" Harvester AI successfully initialized.");
+        }
+
         /**
         * PDF 1. 준비
         */
         void Game::initHarvesters() {
-            // 좌하단 하베스터 (아트레이디스 진영)
-            map.addUnit(std::make_unique<managers::UnitManager::Unit>(
-                types::UnitType::Harvester,
-                5, // buildCost
-                5, // population
-                types::Position{ constants::MAP_HEIGHT - 5, 0 }, // pos
-                70, // health
-                constants::HARVESTER_SPEED, // speed
-                0,  // attackPower
-                0,  // sightRange
-                types::Camp::ArtLadies
-            ));
-
-            // 우상단 하베스터 (하코넨 진영)
-            map.addUnit(std::make_unique<managers::UnitManager::Unit>(
-                types::UnitType::Harvester,
-                5, // buildCost
-                5, // population
-                types::Position{ 2, constants::MAP_WIDTH - 3 }, // pos
-                70, // health
-                constants::HARVESTER_SPEED, // speed
-                0, // attackPower
-                0, // sightRange
-                types::Camp::Harkonnen
-            ));
+            addHarvester({ constants::MAP_HEIGHT - 5, 0 }, types::Camp::ArtLadies);
+            addHarvester({ 2, constants::MAP_WIDTH - 3 }, types::Camp::Harkonnen);
         }
 
         /**
@@ -224,6 +213,21 @@ namespace dune {
                         handleBuildHarvester(building);
                         return;
                     }
+                    else if (key == types::Key::Build_Plate) {
+                        handleBuildPlate();
+                    }
+                    else if (key == types::Key::Build_Dormitory) {
+                        handleBuildDormitory();
+                    }
+                    else if (key == types::Key::Build_Garage) {
+                        handleBuildGarage();
+                    }
+                    else if (key == types::Key::Build_Barracks) {
+                        handleBuildBarracks();
+                    }
+                    else if (key == types::Key::Build_Shelter) {
+                        handleBuildShelter();
+                    }
                     else if (building->getName() == L"Barracks" && key == types::Key::Build_Soldier) {
                         handleBuildSoldier(building);
                     }
@@ -252,21 +256,6 @@ namespace dune {
             else if (key == types::Key::ShowUnitList) {
                 showUnitList();
             }
-            else if (key == types::Key::Build_Plate) {
-                handleBuildPlate();
-            }
-            else if (key == types::Key::Build_Dormitory) {
-                handleBuildDormitory();
-            }
-            else if (key == types::Key::Build_Garage) {
-                handleBuildGarage();
-            }
-            else if (key == types::Key::Build_Barracks) {
-                handleBuildBarracks();
-            }
-            else if (key == types::Key::Build_Shelter) {
-                handleBuildShelter();
-            }
             else if (key == types::Key::Build_Arena) {
                 handleBuildArena();
             }
@@ -281,6 +270,33 @@ namespace dune {
         void Game::updateGameState() {
             map.update(sys_clock);
             map.removeDestroyedBuildings();
+
+            // 하베스터의 스파이스 배달 처리
+            const auto& messages = display.getMessageWindow().getMessages();
+            for (const auto& message : messages) {
+                // "Harvester returned with X spice." 메시지 확인
+                static const std::wregex harvesterPattern(L"Harvester returned with (\\d+) spice\\.");
+                std::wsmatch matches;
+                if (std::regex_search(message.message, matches, harvesterPattern)) {
+                    // 스파이스 양 추출
+                    int spiceAmount = std::stoi(matches[1].str());
+
+                    // 창고 용량 확인 및 자원 추가
+                    int addedSpice = (spiceAmount < (resource.spice_max - resource.spice))
+                        ? spiceAmount
+                        : (resource.spice_max - resource.spice);
+                    resource.spice += addedSpice;
+
+                    // 창고가 가득 찼을 경우 메시지 표시
+                    if (addedSpice < spiceAmount) {
+                        display.addSystemMessage(
+                            L"Storage full! Excess spice discarded: " +
+                            std::to_wstring(spiceAmount - addedSpice)
+                        );
+                    }
+                }
+            }
+
             updateSelectionDisplay();
         }
 
@@ -575,19 +591,15 @@ namespace dune {
                 return;
             }
 
-            // 하베스터 생성
-            map.addUnit(std::make_unique<managers::UnitManager::Unit>(
+            auto harvesterAI = std::make_unique<managers::UnitManager::Unit>(
                 types::UnitType::Harvester,
-                5,      // build_cost
-                5,      // population
                 cursor_pos,
-                70,     // health
-                constants::HARVESTER_SPEED,
-                0,      // attack_power
-                0,      // sight_range
                 building->getType() == types::Camp::ArtLadies ?
                 types::Camp::ArtLadies : types::Camp::Harkonnen
-            ));
+            );
+
+            // 하베스터 생성
+            map.addUnit(std::move(harvesterAI));
 
             // 자원 소비
             resource.spice -= 5;
@@ -844,7 +856,15 @@ namespace dune {
                 if (auto* building = current_selection.getSelected<Building>()) {
                     status_text = L"Selected Building: " + building->getName();
                     if (building->getName() == L"Base") {
-                        command_text = { L"H: Build Harvester", L"ESC: Cancel" };
+                        command_text = { 
+                            L"H: Produce Harvester", 
+                            L"Shift + P: Place Plate",
+                            L"Shift + D: Place Dormitory",
+                            L"Shift + G: Place Garage",
+                            L"Shift + K: Place Barracks",
+                            L"Shift + S: Place Shelter",
+                            L"ESC: Cancel"
+                        };
                     }
                     else if (building->getName() == L"Barracks") {
                         command_text = { L"S: Produce Soldier", L"ESC: Cancel" };

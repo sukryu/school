@@ -33,12 +33,39 @@ namespace dune {
              */
             void draw(Renderer& renderer) override;
 
-        private:
+            /**
+         * @brief 시간 정보가 포함된 메시지 구조체입니다.
+         */
             struct TimedMessage {
                 std::wstring message;
                 std::chrono::steady_clock::time_point timestamp;
                 bool isImportant;
+                bool isProcessed;  // 메시지 처리 여부
+
+                TimedMessage(const std::wstring& msg, bool important = false)
+                    : message(msg)
+                    , timestamp(std::chrono::steady_clock::now())
+                    , isImportant(important)
+                    , isProcessed(false) {}
             };
+
+            const std::deque<TimedMessage>& getMessages() const {
+                return messages_;
+            }
+
+            /**
+             * @brief 특정 메시지를 처리 완료로 표시합니다.
+             */
+            void markMessageProcessed(const std::wstring& message) {
+                for (auto& timedMessage : messages_) {
+                    if (timedMessage.message == message && !timedMessage.isProcessed) {
+                        timedMessage.isProcessed = true;
+                        break;
+                    }
+                }
+            }
+
+        private:
 
             static constexpr size_t MAX_MESSAGES = 8;
             static constexpr std::chrono::seconds MESSAGE_DURATION{ 5 }; // 일반 메시지 표시 시간
