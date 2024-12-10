@@ -41,7 +41,7 @@ namespace dune {
 
             drawBorder(renderer);
 
-            int messageY = 2;
+            int messageY = 1;
             for (const auto& timedMessage : messages_) {
                 // 중요 메시지는 다른 색상으로 표시
                 int color = timedMessage.isImportant ?

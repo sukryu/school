@@ -97,8 +97,11 @@ namespace dune {
                 current_key = types::Key::ShowUnitList;
                 break;
                 // 유닛 명령 (Shift 없이)
-            case 'h': case 'H':
-                current_key = types::Key::Build_Harvester;
+            case 'h':
+                 current_key = types::Key::Build_Harvester;
+                 break;
+            case 'H':
+                 current_key = types::Key::Harvest;
                 break;
 
             case 'm': case 'M':

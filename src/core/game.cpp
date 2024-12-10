@@ -130,17 +130,95 @@ namespace dune {
             sandworm2->initializeAI(); // AI 초기화
 
             map.addUnit(std::move(sandworm2));
+
+            display.addSystemMessage(L"Sandworm AI successfully initialized.");
         }
 
         void Game::addHarvester(const types::Position& pos, types::Camp camp) {
             auto harvester = std::make_unique<managers::UnitManager::Unit>(
-                types::UnitType::Harvester, pos, camp
+                types::UnitType::Harvester,
+                5,
+                5,
+                pos,
+                70,
+                constants::HARVESTER_SPEED,
+                0, 0,
+                camp
             );
             harvester->initializeAI();
             map.addUnit(std::move(harvester));
 
             std::wstring campName = (camp == types::Camp::ArtLadies) ? L"ArtLadies" : L"Harkonnen";
             display.addSystemMessage(campName + L" Harvester AI successfully initialized.");
+        }
+
+        void Game::addSoldier(const types::Position& pos, types::Camp camp) {
+            auto soldier = std::make_unique<managers::UnitManager::Unit>(
+                types::UnitType::Soldier,
+                1,
+                1,
+                pos,
+                15,
+                constants::SOLDIER_SPEED,
+                5, 1,
+                camp
+            );
+            soldier->initializeAI();
+            map.addUnit(std::move(soldier));
+
+            display.addSystemMessage(L"Camp ArtLadies`s Soldier AI successfully initialized.");
+        }
+
+        void Game::addFremen(const types::Position& pos, types::Camp camp) {
+            auto fremen = std::make_unique<managers::UnitManager::Unit>(
+                types::UnitType::Fremen,
+                5,
+                2,
+                pos,
+                25,
+                constants::FREMEN_SPEED,
+                15, 8,
+                camp
+            );
+            fremen->initializeAI();
+            map.addUnit(std::move(fremen));
+
+            display.addSystemMessage(L"Camp ArtLadies`s Fremen AI successfully initialized.");
+        }
+
+        void Game::addFighter(const types::Position& pos, types::Camp camp) {
+            auto fighter = std::make_unique<managers::UnitManager::Unit>(
+                types::UnitType::Fighter,
+                1,
+                1,
+                pos,
+                6,
+                constants::FIGHTER_SPEED,
+                10, 1,
+                camp
+            );
+            fighter->initializeAI();
+            map.addUnit(std::move(fighter));
+
+            display.addSystemMessage(L"Camp Harkonnen`s Fighter AI successfully initialized.");
+        }
+
+        void Game::addHeavyTank(const types::Position& pos, types::Camp camp) {
+            auto heavyTank = std::make_unique<managers::UnitManager::Unit>(
+                types::UnitType::HeavyTank,
+                12,
+                5,
+                pos,
+                60,
+                constants::HEAVY_TANK_SPEED,
+                40, 4,
+                camp
+            );
+            heavyTank->initializeAI();
+            map.addUnit(std::move(heavyTank));
+
+            std::wstring campName = (camp == types::Camp::ArtLadies) ? L"ArtLadies" : L"Harkonnen";
+            display.addSystemMessage(L"Camp Harkonnen`s heavyTank AI successfully initialized.");
         }
 
         /**
@@ -207,6 +285,10 @@ namespace dune {
         void Game::processInput() {
             types::Key key = IO::getKey();
 
+            if (utils::is_arrow_key(key)) {
+                handleMovement(key);
+            }
+
             if (current_selection.type_ == types::SelectionType::Building) {
                 if (auto* building = current_selection.getSelected<Building>()) {
                     if (building->getName() == L"Base" && key == types::Key::Build_Harvester) {
@@ -242,6 +324,14 @@ namespace dune {
                     }
                 }
             }
+            if (current_selection.type_ == types::SelectionType::Unit) {
+                if (auto* units = current_selection.getSelected<Unit>()) {
+                    if (units->getRepresentation() == L'H' && key == types::Key::Harvest || key == types::Key::Move) {
+                        handleUnitCommands(key);
+                        return;
+                    }
+                }
+            }
 
             if (key == types::Key::Quit) {
                 game_state = types::GameState::GameOver;
@@ -261,9 +351,6 @@ namespace dune {
             }
             else if (key == types::Key::Build_Factory) {
                 handleBuildFactory();
-            }
-            else if (utils::is_arrow_key(key)) {
-                handleMovement(key);
             }
         }
 
@@ -591,15 +678,10 @@ namespace dune {
                 return;
             }
 
-            auto harvesterAI = std::make_unique<managers::UnitManager::Unit>(
-                types::UnitType::Harvester,
-                cursor_pos,
+           addHarvester(cursor_pos,
                 building->getType() == types::Camp::ArtLadies ?
                 types::Camp::ArtLadies : types::Camp::Harkonnen
             );
-
-            // 하베스터 생성
-            map.addUnit(std::move(harvesterAI));
 
             // 자원 소비
             resource.spice -= 5;
@@ -639,18 +721,8 @@ namespace dune {
                 return;
             }
 
-            // 하베스터 생성
-            map.addUnit(std::make_unique<managers::UnitManager::Unit>(
-                types::UnitType::Soldier,
-                1,      // build_cost
-                1,      // population
-                cursor_pos,
-                15,     // health
-                constants::SOLDIER_SPEED,
-                5,      // attack_power
-                1,      // sight_range
-                types::Camp::ArtLadies
-            ));
+            // 보병 생성
+            addSoldier(cursor_pos, types::Camp::ArtLadies);
 
             // 자원 소비
             resource.spice -= 1;
@@ -690,18 +762,8 @@ namespace dune {
                 return;
             }
 
-            // 하베스터 생성
-            map.addUnit(std::make_unique<managers::UnitManager::Unit>(
-                types::UnitType::Fremen,
-                5,      // build_cost
-                2,      // population
-                cursor_pos,
-                25,     // health
-                constants::FREMEN_SPEED,
-                15,      // attack_power
-                8,      // sight_range
-                types::Camp::ArtLadies
-            ));
+            // 프레멘 생성
+            addFremen(cursor_pos, types::Camp::ArtLadies);
 
             // 자원 소비
             resource.spice -= 5;
@@ -741,18 +803,8 @@ namespace dune {
                 return;
             }
 
-            // 하베스터 생성
-            map.addUnit(std::make_unique<managers::UnitManager::Unit>(
-                types::UnitType::Fighter,
-                1,      // build_cost
-                1,      // population
-                cursor_pos,
-                10,     // health
-                constants::FIGHTER_SPEED,
-                6,      // attack_power
-                1,      // sight_range
-                types::Camp::Harkonnen
-            ));
+            // 투사 생성
+            addFighter(cursor_pos, types::Camp::Harkonnen);
 
             // 자원 소비
             resource.spice -= 1;
@@ -792,18 +844,8 @@ namespace dune {
                 return;
             }
 
-            // 하베스터 생성
-            map.addUnit(std::make_unique<managers::UnitManager::Unit>(
-                types::UnitType::HeavyTank,
-                12,      // build_cost
-                5,      // population
-                cursor_pos,
-                60,     // health
-                constants::HEAVY_TANK_SPEED,
-                40,      // attack_power
-                4,      // sight_range
-                types::Camp::Harkonnen
-            ));
+            // 중전차 생성
+            addHeavyTank(cursor_pos, types::Camp::Harkonnen);
 
             // 자원 소비
             resource.spice -= 12;
@@ -815,12 +857,6 @@ namespace dune {
         void Game::handleSelection() {
             types::Position pos = cursor.getCurrentPosition();
             current_selection.position_ = pos;
-
-            auto key = IO::getKey();
-            if (key == types::Key::Build_Plate) {
-                handleBuildPlate();
-                return;
-            }
 
             if (const Unit* unit = map.getEntityAt<Unit>(pos)) {
                 current_selection.type_ = types::SelectionType::Unit;
@@ -849,7 +885,23 @@ namespace dune {
             case types::SelectionType::Unit:
                 if (auto* unit = current_selection.getSelected<core::Selection::Unit>()) {
                     status_text = L"Selected Unit: " + std::wstring(1, unit->getRepresentation());
-                    command_text = { L"M: Move", L"A: Attack", L"S: Stop" };
+
+                    switch (unit->getType()) {
+                    case types::UnitType::Harvester:
+                        command_text = { L"M: Move", L"H: Harvest" };
+                        break;
+
+                    case types::UnitType::Soldier:
+                    case types::UnitType::Fremen:
+                    case types::UnitType::Fighter:
+                    case types::UnitType::HeavyTank:
+                        command_text = { L"M: Move", L"A: Attack", L"P: Patrol" };
+                        break;
+
+                    default:
+                        command_text = { L"No Actions Available" };
+                        break;
+                    }
                 }
                 break;
             case types::SelectionType::Building:
@@ -951,7 +1003,6 @@ namespace dune {
         }
 
         void Game::showUnitList() {
-            std::wcout << L"Executing Show Unit List" << std::endl; // 디버깅용
             std::map<wchar_t, int> unitCounts;
             std::wstring status_text = L"Unit List:\n";
 
@@ -967,10 +1018,93 @@ namespace dune {
             }
 
             display.updateStatus(status_text);
-            std::wcout << status_text << std::endl; // 디버깅용
         }
 
+        void Game::handleUnitCommands(types::Key key) {
+            if (current_selection.type_ != types::SelectionType::Unit) return;
 
+            const auto* const_unit = current_selection.getSelected<core::Selection::Unit>();
+            if (!const_unit) return;
+
+            auto* unit = const_cast<Unit*>(const_unit);
+
+            // 선택된 유닛의 위치와 커서 위치
+            types::Position unitPos = unit->getPosition();
+            types::Position targetPos = cursor.getCurrentPosition();
+
+            switch (unit->getType()) {
+            case types::UnitType::Harvester:
+                handleHarvesterCommands(unit, key, targetPos);
+                break;
+
+            case types::UnitType::Soldier:
+            case types::UnitType::Fremen:
+            case types::UnitType::Fighter:
+            case types::UnitType::HeavyTank:
+                handleCombatUnitCommands(unit, key, targetPos);
+                break;
+
+            default:
+                break;
+            }
+        }
+
+        void Game::handleHarvesterCommands(Unit* unit, types::Key key, const types::Position& targetPos) {
+            auto* harvesterAI = unit->getHarvesterAI();
+            if (!harvesterAI) {
+                display.addSystemMessage(L"[DEBUG] No harvester AI found in handleHarvesterCommands");
+                return;
+            }
+
+            if (key == types::Key::Move) {
+                display.addSystemMessage(L"[DEBUG] Processing Move command");
+                harvesterAI->giveMoveCommand(unit, map, targetPos, sys_clock);
+            }
+            else if (key == types::Key::Harvest) {
+                display.addSystemMessage(L"[DEBUG] Processing Harvest command");
+                const auto& terrain = map.getTerrainManager().getTerrain(targetPos);
+                if (terrain.getType() == types::TerrainType::Spice) {
+                    display.addSystemMessage(L"[DEBUG] Found spice at target location");
+                    harvesterAI->giveHarvestCommand(unit, map, targetPos, sys_clock);
+                }
+                else {
+                    display.addSystemMessage(L"Cannot harvest here: No spice found.");
+                }
+            }
+
+            display.addSystemMessage(L"[DEBUG] Command processing completed");
+        }
+
+        void Game::handleCombatUnitCommands(Unit* unit, types::Key key, const types::Position& targetPos) {
+            auto* combatAI = unit->getCombatUnitAI();
+            if (!combatAI) return;
+
+            switch (key) {
+            case types::Key::Move:
+                combatAI->moveCommand(targetPos);
+                break;
+
+            case types::Key::Patrol:
+                combatAI->patrolCommand(unit->getPosition(), targetPos);
+                break;
+
+            case types::Key::Attack:
+                if (auto* targetUnit = map.getEntityAt<Unit>(targetPos)) {
+                    if (targetUnit->getCamp() != unit->getCamp()) {
+                        combatAI->attackCommand(targetUnit);
+                    }
+                    else {
+                        display.addSystemMessage(L"Cannot attack friendly units.");
+                    }
+                }
+                else {
+                    display.addSystemMessage(L"No target found at selected position.");
+                }
+                break;
+            default:
+                break;
+            }
+        }
 
     } // namespace core
 } // namespace dune

@@ -23,11 +23,36 @@ namespace dune {
                 // unitPtr는 unique_ptr<Unit>이므로 unitPtr->getType() 형태로 호출 가능
                 switch (unitPtr->getType()) {
                     case types::UnitType::Sandworm:
-                        // updateSandworm는 Unit*를 필요로 하므로 unitPtr.get()으로 raw pointer 획득
-                        updateSandworm(unitPtr.get(), currentTime);
+                        if (auto* sandwormAI = unitPtr->getSandwormAI()) {
+                            sandwormAI->update(unitPtr.get(), *this, currentTime);
+                        }
+                        else {
+                            addSystemMessage(L"Cannot Initialize S AI");
+                        }
+                        break;
+
+                    case types::UnitType::Harvester:
+                        if (auto* harvesterAI = unitPtr->getHarvesterAI()) {
+                            addSystemMessage(L"[DEBUG] Updating harvester AI");
+                            harvesterAI->update(unitPtr.get(), *this, currentTime);
+                        }
+                        else {
+                            addSystemMessage(L"Cannot Initialize H AI");
+                        }
+                        break;
+
+                    case types::UnitType::Soldier:
+                    case types::UnitType::Fremen:
+                    case types::UnitType::Fighter:
+                    case types::UnitType::HeavyTank:
+                        if (auto* combatAI = unitPtr->getCombatUnitAI()) {
+                            combatAI->update(*this, currentTime);
+                        }
+                        else {
+                            addSystemMessage(L"Cannot Initialize C AI");
+                        }
                         break;
                     default:
-                        // 일반 유닛 처리 로직
                         break;
                 }
             }

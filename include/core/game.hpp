@@ -199,10 +199,18 @@ namespace dune {
             void render();
 
             void addHarvester(const types::Position& pos, types::Camp camp);
+            void addSoldier(const types::Position& pos, types::Camp camp);
+            void addFremen(const types::Position& pos, types::Camp camp);
+            void addFighter(const types::Position& pos, types::Camp camp);
+            void addHeavyTank(const types::Position& pos, types::Camp camp);
 
             bool placeBuilding(std::unique_ptr<managers::BuildingManager::Building> building);
 
             void showUnitList();
+
+            void handleUnitCommands(types::Key key);
+            void handleHarvesterCommands(Unit* unit, types::Key key, const types::Position& targetPos);
+            void handleCombatUnitCommands(Unit* unit, types::Key key, const types::Position& targetPos);
 
             // 게임 상태
             std::chrono::milliseconds sys_clock;

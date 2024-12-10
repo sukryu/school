@@ -75,6 +75,7 @@ namespace dune {
             Harvest,
             Move,
             Attack,
+            Patrol,
             Stop,
             Cancel,
             Build_Plate,

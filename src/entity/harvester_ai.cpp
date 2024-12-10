@@ -12,6 +12,7 @@ namespace dune::entity {
             , spiceAmount_(0) {}
     
     void HarvesterAI::update(Unit* harvester, core::Map& map, std::chrono::milliseconds currentTime) {
+        map.addSystemMessage(L"[DEBUG] HarvesterAI::update - Current State: " + currentState_->getStateName());
         if (currentState_) {
             currentState_->update(harvester, map, currentTime);
         }
@@ -19,8 +20,13 @@ namespace dune::entity {
         // 명령이 없고 유후 상태일 때 마지막 명령 반복 실행
         if (commandQueue_.hasCommand() &&
         currentState_->getStateName() == L"Idle") {
+            map.addSystemMessage(L"[DEBUG] Executing last command in Idle state");
             executeLastCommand(harvester, map, currentTime);
         }
+    }
+
+    void HarvesterAI::changeState(std::unique_ptr<HarvesterState> newState) {
+        currentState_ = std::move(newState);
     }
 
     bool HarvesterAI::giveHarvestCommand(
@@ -28,9 +34,10 @@ namespace dune::entity {
         const types::Position& spicePosition,
         std::chrono::milliseconds currentTime
     ) {
+        map.addSystemMessage(L"[DEBUG] Attempting to give harvest command");
         const auto& terrain = map.getTerrainManager().getTerrain(spicePosition);
         if (terrain.getType() != types::TerrainType::Spice) {
-            map.addSystemMessage(L"Invalid harvest location: No spice found.");
+            map.addSystemMessage(L"[DEBUG] Invalid harvest location: No spice");
             return false;
         }
 
@@ -43,6 +50,7 @@ namespace dune::entity {
         commandQueue_.addCommand(command);
         targetPosition_ = spicePosition;
         changeState(std::make_unique<MovingToHarvestState>(this, spicePosition));
+        map.addSystemMessage(L"[DEBUG] Harvest command given successfully");
         return true;
     }
 
@@ -52,6 +60,7 @@ namespace dune::entity {
         const types::Position& movePosition,
         std::chrono::milliseconds currentTime
     ) {
+        map.addSystemMessage(L"Commands Successfully response");
         if (!isValidMovePosition(map, movePosition)) {
             map.addSystemMessage(L"Cannot move to this location.");
             return false;
@@ -61,6 +70,7 @@ namespace dune::entity {
         commandQueue_.addCommand(command);
         targetPosition_ = movePosition;
         changeState(std::make_unique<MovingState>(this, movePosition));
+        map.addSystemMessage(L"Commands Successfully change state");
         return true;
     }
 
@@ -70,15 +80,23 @@ namespace dune::entity {
         std::chrono::milliseconds currentTime
     ) {
         const auto& command = commandQueue_.getCurrentCommand();
+        bool commandExecuted = false;
+
         switch (command.type) {
-            case HarvesterCommand::Type::Harvest:
-                giveHarvestCommand(harvester, map, command.targetPosition, currentTime);
-                break;
-            case HarvesterCommand::Type::Move:
-                giveMoveCommand(harvester, map, command.targetPosition, currentTime);
-                break;
-            default:
-                break;
+        case HarvesterCommand::Type::Harvest:
+            commandExecuted = giveHarvestCommand(harvester, map, command.targetPosition, currentTime);
+            break;
+        case HarvesterCommand::Type::Move:
+            commandExecuted = giveMoveCommand(harvester, map, command.targetPosition, currentTime);
+            break;
+        default:
+            break;
+        }
+
+        // 명령이 성공적으로 실행되었다면 큐를 비웁니다
+        if (commandExecuted) {
+            map.addSystemMessage(L"[DEBUG] Command executed successfully, clearing queue");
+            commandQueue_.clear();
         }
     }
 

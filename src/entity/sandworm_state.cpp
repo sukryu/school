@@ -190,7 +190,7 @@ namespace dune::entity {
                         sandworm->consumeTarget();
                         map.addSystemMessage(L"Sandworm successfully caught its prey!");
                         map.removeUnit(prey);
-                        sandworm->getAI()->changeState(std::make_unique<DigestingState>(sandworm->getAI()));
+                        sandworm->getSandwormAI()->changeState(std::make_unique<DigestingState>(sandworm->getSandwormAI()));
                         return;
                     }
                 }
@@ -220,8 +220,8 @@ namespace dune::entity {
         if (currentTime - digestStartTime_ >= DIGESTION_TIME) {
             if (sandworm->shouldExcrete()) {
                 map.addSystemMessage(L"Sandworm is preparing to create spice...");
-                if (auto ai = sandworm->getAI()) { // AI가 nullptr이 아닌지 확인
-                    ai->changeState(std::make_unique<BurrowingState>(sandworm->getAI()));
+                if (auto ai = sandworm->getSandwormAI()) { // AI가 nullptr이 아닌지 확인
+                    ai->changeState(std::make_unique<BurrowingState>(sandworm->getSandwormAI()));
                 }
                 else {
                     map.addSystemMessage(L"Error: Sandworm AI not initialized.");
@@ -229,8 +229,8 @@ namespace dune::entity {
             }
             else {
                 map.addSystemMessage(L"Sandworm returns to hunting.");
-                if (auto ai = sandworm->getAI()) {
-                    ai->changeState(std::make_unique<HuntingState>(sandworm->getAI()));
+                if (auto ai = sandworm->getSandwormAI()) {
+                    ai->changeState(std::make_unique<HuntingState>(sandworm->getSandwormAI()));
                 }
                 else {
                     map.addSystemMessage(L"Error: Sandworm AI not initialized.");
@@ -255,7 +255,7 @@ namespace dune::entity {
             map.addSystemMessage(L"Sandworm has created a new spice field!");
 
             // 사냥 상태로 전환
-            sandworm->getAI()->changeState(std::make_unique<HuntingState>(sandworm->getAI()));
+            sandworm->getSandwormAI()->changeState(std::make_unique<HuntingState>(sandworm->getSandwormAI()));
         }
     }
 }

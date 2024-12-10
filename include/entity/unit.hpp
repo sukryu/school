@@ -3,6 +3,7 @@
 #include "utils/types.hpp"
 #include "sandworm_ai.hpp"
 #include "harvester_ai.hpp"
+#include "combat_unit_ai.hpp"
 #include <memory>
 #include <chrono>
 #include <string>
@@ -140,11 +141,19 @@ namespace dune {
                     sandworm_ai_ = std::make_unique<SandwormAI>();
                 }
                 else if (type_ == types::UnitType::Harvester) {
-                    harvester_ai_ = std::make_unique<HarvesterAI>();
+                    harvester_ai_ = std::make_unique<HarvesterAI>(position_);
+                }
+                else if (
+                    type_ == types::UnitType::Soldier ||
+                    type_ == types::UnitType::Fremen ||
+                    type_ == types::UnitType::Fighter ||
+                    type_ == types::UnitType::HeavyTank) {
+                    combat_unit_ai_ = std::make_unique<combat::CombatUnitAI>(this);
                 }
             }
             SandwormAI* getSandwormAI() { return sandworm_ai_.get(); }
             HarvesterAI* getHarvesterAI() { return harvester_ai_.get(); }
+            combat::CombatUnitAI* getCombatUnitAI() { return combat_unit_ai_.get(); }
             void update(core::Map& map, std::chrono::milliseconds currentTime);
 
         private:
@@ -161,6 +170,7 @@ namespace dune {
             std::chrono::milliseconds lastMoveTime_{ 0 };
             std::unique_ptr<SandwormAI> sandworm_ai_;
             std::unique_ptr<HarvesterAI> harvester_ai_;
+            std::unique_ptr<combat::CombatUnitAI> combat_unit_ai_;
         };
     } // namespace entity
 } // namespace dune

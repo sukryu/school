@@ -5,15 +5,6 @@
 #include "harvester_state.hpp"
 #include "utils/harvester_command.hpp"
 
-// 전방 선언
-namespace dune {
-    namespace core { class Map; }
-    namespace entity {
-        class Unit;
-        class HarvesterState;
-    }
-}
-
 namespace dune::entity {
     /**
      * @brief 하베스터의 AI를 관리하는 클래스입니다.
@@ -50,9 +41,7 @@ namespace dune::entity {
             return currentState_ ? currentState_->getStateName() : L"Unknown";
         }
 
-        inline void changeState(std::unique_ptr<HarvesterState> newState) {
-            currentState_ = std::move(newState);
-        }
+        void changeState(std::unique_ptr<HarvesterState> newState);
 
         inline const HarvesterCommand& getCurrentCommand() const {
             return commandQueue_.getCurrentCommand();
